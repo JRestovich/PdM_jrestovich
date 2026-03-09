@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include <stdbool.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -31,6 +32,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define DEBOUNCE_MS 30U
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -57,6 +59,8 @@ static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN 0 */
 static uint32_t timesMs[] = {200, 500};
 static uint8_t  timeIndex = 0;
+static uint32_t lastDebounceTick = 0;
+static bool pressed = false;
 
 /* USER CODE END 0 */
 
@@ -105,11 +109,18 @@ int main(void)
 	  //HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 	  HAL_Delay(timesMs[timeIndex]);
 
-	  if (!HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)){
+	  if (!HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) && !pressed){
 		  timeIndex++;
+		  pressed = true;
+		  lastDebounceTick = HAL_GetTick();
 		  if (timeIndex >= (sizeof(timesMs) / sizeof(timesMs[0]))) {
 			  timeIndex = 0;
 		  }
+	  }
+
+	  uint32_t now = HAL_GetTick();
+	  if (pressed && now - lastDebounceTick > DEBOUNCE_MS) {
+		  pressed = false;
 	  }
 
   }
