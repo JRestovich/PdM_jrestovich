@@ -55,6 +55,8 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+static uint32_t timesMs[] = {200, 500};
+static uint8_t  timeIndex = 0;
 
 /* USER CODE END 0 */
 
@@ -101,11 +103,16 @@ int main(void)
 
 	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 	  //HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-	  HAL_Delay(500);
+	  HAL_Delay(timesMs[timeIndex]);
 
 	  if (!HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)){
 		  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
 		  while(1);
+	  }
+
+	  timeIndex++;
+	  if (timeIndex >= (sizeof(timesMs) / sizeof(timesMs[0]))) {
+		  timeIndex = 0;
 	  }
 
 
