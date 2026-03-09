@@ -106,15 +106,11 @@ int main(void)
 	  HAL_Delay(timesMs[timeIndex]);
 
 	  if (!HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)){
-		  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
-		  while(1);
+		  timeIndex++;
+		  if (timeIndex >= (sizeof(timesMs) / sizeof(timesMs[0]))) {
+			  timeIndex = 0;
+		  }
 	  }
-
-	  timeIndex++;
-	  if (timeIndex >= (sizeof(timesMs) / sizeof(timesMs[0]))) {
-		  timeIndex = 0;
-	  }
-
 
   }
   /* USER CODE END 3 */
