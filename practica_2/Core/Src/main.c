@@ -97,6 +97,7 @@ void delayWrite(delay_t* delay, tick_t duration)
 
 delay_t delay;
 uint8_t contador;
+uint8_t tiempo_idx = 0;
 uint16_t contadores[3] = {1000, 200, 100};
 /* USER CODE END 0 */
 
@@ -141,15 +142,17 @@ int main(void)
     /* USER CODE END WHILE */
 
     if(delayRead(&delay)) {
-      HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-      contador++;
-      if(contador == (sizeof(contadores) / sizeof(contadores[0])) * SEMIPERIODOS) { 
-        contador = 0;
-      }
-      if(contador % SEMIPERIODOS == 0) {
-        delayWrite(&delay, contadores[contador / SEMIPERIODOS]);
-      }
-    }
+	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	  contador++;
+	  if(contador >= SEMIPERIODOS) {
+		  tiempo_idx++;
+		  contador = 0;
+		  if (tiempo_idx >= sizeof(contadores) / sizeof(contadores[0])) {
+			  tiempo_idx = 0;
+		  }
+		  delayWrite(&delay, contadores[tiempo_idx]);
+	  }
+	}
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
