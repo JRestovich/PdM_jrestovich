@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "API_delay.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -56,49 +57,15 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void delayInit(delay_t* delay, tick_t duration)
-{
-  if(delay == NULL) { 
-    return;
-  }
-
-  delay->duration = duration;
-  delay->startTime = 0;
-  delay->running = false;
-}
-
-bool_t delayRead(delay_t *delay)
-{
-  /// verify that pointer to delay is valid
-  if(delay == NULL) { 
-    return false;
-  }
-
-  if(delay->running) {
-    if(HAL_GetTick() - delay->startTime >= delay->duration) {
-      delay->running = false;
-      return true;
-    }
-  } else {
-    delay->startTime = HAL_GetTick();
-    delay->running = true;
-  }
-  return false;
-}
-
-void delayWrite(delay_t* delay, tick_t duration)
-{
-  /// verify that pointer to delay is valid
-  if(delay == NULL) { 
-    return; 
-  }
-  delay->duration = duration;
-}
 
 delay_t delay;
 uint8_t contador;
 uint8_t tiempo_idx = 0;
 uint16_t contadores[3] = {1000, 200, 100};
+
+const uint32_t TIEMPOS[] = {500, 100, 100, 1000};
+
+
 /* USER CODE END 0 */
 
 /**
@@ -132,7 +99,7 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  delayInit(&delay, 1000);
+  delayInit(&delay, TIEMPOS[0]);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -142,16 +109,19 @@ int main(void)
     /* USER CODE END WHILE */
 
     if(delayRead(&delay)) {
-	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	  contador++;
-	  if(contador >= SEMIPERIODOS) {
-		  tiempo_idx++;
-		  contador = 0;
-		  if (tiempo_idx >= sizeof(contadores) / sizeof(contadores[0])) {
-			  tiempo_idx = 01;
-		  }
-		  delayWrite(&delay, contadores[tiempo_idx]);
-	  }
+    	contador++;
+    	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+    	if (contador %2 == 0 ) {
+    		contador = 0;
+    		tiempo_idx++;
+    		if (tiempo_idx >= sizeof(contadores) / sizeof(contadores[0])) {
+			  tiempo_idx = 0;
+		}
+			if (!delayIsRunning(&delay)) {
+				delayWrite(&delay, contadores[tiempo_idx]);
+			}
+
+    	}
 	}
     /* USER CODE BEGIN 3 */
   }
