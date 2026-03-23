@@ -32,7 +32,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define SEMIPERIODOS 10
+#define SEMIPERIODOS 2
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -61,8 +61,6 @@ static void MX_USART2_UART_Init(void);
 delay_t delay;
 uint8_t contador;
 uint8_t tiempo_idx = 0;
-uint16_t contadores[3] = {1000, 200, 100};
-
 const uint32_t TIEMPOS[] = {500, 100, 100, 1000};
 
 
@@ -109,19 +107,16 @@ int main(void)
     /* USER CODE END WHILE */
 
     if(delayRead(&delay)) {
-    	contador++;
-    	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-    	if (contador %2 == 0 ) {
-    		contador = 0;
-    		tiempo_idx++;
-    		if (tiempo_idx >= sizeof(contadores) / sizeof(contadores[0])) {
-			  tiempo_idx = 0;
-		}
-			if (!delayIsRunning(&delay)) {
-				delayWrite(&delay, contadores[tiempo_idx]);
-			}
-
-    	}
+	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	  contador++;
+	  if(contador >= SEMIPERIODOS) {
+		  tiempo_idx++;
+		  contador = 0;
+		  if (tiempo_idx >= sizeof(TIEMPOS) / sizeof(TIEMPOS[0])) {
+			  tiempo_idx = 01;
+		  }
+		  delayWrite(&delay, TIEMPOS[tiempo_idx]);
+	  }
 	}
     /* USER CODE BEGIN 3 */
   }
