@@ -33,6 +33,13 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define SEMIPERIODOS 2
+
+typedef enum tagTimes {
+	_500Miliseconds = 500U,
+	_100Miliseconds = 100U,
+	_1000Miliseconds = 1000U
+} Times;
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -61,7 +68,7 @@ static void MX_USART2_UART_Init(void);
 delay_t delay;
 uint8_t contador;
 uint8_t tiempo_idx = 0;
-const uint32_t TIEMPOS[] = {500, 100, 100, 1000};
+const uint32_t TIEMPOS[] = {_500Miliseconds, _100Miliseconds, _100Miliseconds, _1000Miliseconds};
 
 
 /* USER CODE END 0 */
