@@ -106,18 +106,21 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-    if(delayRead(&delay)) {
-	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	  contador++;
-	  if(contador >= SEMIPERIODOS) {
-		  tiempo_idx++;
-		  contador = 0;
-		  if (tiempo_idx >= sizeof(TIEMPOS) / sizeof(TIEMPOS[0])) {
-			  tiempo_idx = 01;
-		  }
-		  delayWrite(&delay, TIEMPOS[tiempo_idx]);
-	  }
-	}
+    if (delayRead(&delay)) {
+      HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+      contador++;
+      if (contador >= SEMIPERIODOS) {
+        tiempo_idx++;
+        contador = 0;
+        if (tiempo_idx >= sizeof(TIEMPOS) / sizeof(TIEMPOS[0])) {
+          tiempo_idx = 01;
+		    }
+
+        if (!delayIsRunning(&delay)) {
+          delayWrite(&delay, TIEMPOS[tiempo_idx]);
+        }
+      }
+    }
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

@@ -50,7 +50,7 @@ bool_t delayIsRunning(delay_t * delay)
 {
 	/// verify that pointer to delay is valid
 	  if(delay == NULL) {
-		return false;
+		  return false;
 	  }
 	  return delay->running;
 
