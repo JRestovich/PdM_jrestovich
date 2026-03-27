@@ -5,6 +5,8 @@
  *      Author: joaquin
  */
 
+#include "API_delay.h"
+
 #ifndef API_INC_API_DEBOUNCE_H_
 #define API_INC_API_DEBOUNCE_H_
 
@@ -26,5 +28,6 @@ void debounceFSM_update();	// debe leer las entradas, resolver la lógica de
 							// transición de estados y actualizar las salidas
 
 debounceState_t debounceFSM_getState();
+bool_t readKey();
 
 #endif /* API_INC_API_DEBOUNCE_H_ */

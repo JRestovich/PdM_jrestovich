@@ -5,7 +5,6 @@
  *      Author: joaquin
  */
 #include "API_debounce.h"
-#include "API_delay.h"
 #include <stddef.h>
 #include "stm32f4xx_hal.h"
 
@@ -14,8 +13,6 @@
 static delay_t delay;
 static debounceState_t state = BUTTON_UP;
 static bool_t flanco = false;
-
-bool_t readKey();
 
 void debounceFSM_init()
 {

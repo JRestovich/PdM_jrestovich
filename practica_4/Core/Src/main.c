@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "API_delay.h"
 #include "API_debounce.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -64,6 +65,10 @@ static void MX_USART2_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 /* USER CODE END 0 */
+delay_t delay;
+uint8_t contador;
+uint8_t tiempo_idx = 0;
+const uint32_t TIEMPOS[] = {500, 100};
 
 /**
   * @brief  The application entry point.
@@ -97,6 +102,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   /* USER CODE END 2 */
 
+  delayInit(&delay, TIEMPOS[0]);
   debounceFSM_init();
 
   /* Infinite loop */
@@ -106,10 +112,23 @@ int main(void)
 	  debounceFSM_update();
 
 	  // Punto 1
-	  if (debounceFSM_getState() == BUTTON_UP) {
+	  /*if (debounceFSM_getState() == BUTTON_UP) {
 		  buttonReleased();
 	  } else if(debounceFSM_getState() == BUTTON_DOWN) {
 		  buttonPressed();
+	  }*/
+
+	  // Punto 2
+	  if (readKey()) {
+		  tiempo_idx++;
+		  if (tiempo_idx >= sizeof(TIEMPOS) / sizeof(TIEMPOS[0])) {
+			  tiempo_idx = 0;
+		  }
+		  delayWrite(&delay, TIEMPOS[tiempo_idx]);
+	  }
+
+	  if (delayRead(&delay)) {
+	        HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 	  }
   }
   /* USER CODE END 3 */
