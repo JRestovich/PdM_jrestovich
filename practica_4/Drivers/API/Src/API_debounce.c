@@ -27,7 +27,7 @@ void debounceFSM_update()
 			if(!HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)) {
 				state = BUTTON_FALLING;
 				delayInit(&delay, ANTIBOUNCE_TIME_MS);
-				flanco = true;
+				// flanco = true;
 			}
 			//buttonReleased();
 			break;
@@ -38,6 +38,7 @@ void debounceFSM_update()
 					state = BUTTON_DOWN;
 				} else {
 					state = BUTTON_UP;
+					flanco = true;
 				}
 			}
 			//buttonPressed();
