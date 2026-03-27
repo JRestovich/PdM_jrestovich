@@ -32,7 +32,7 @@ void debounceFSM_update()
 				delayInit(&delay, ANTIBOUNCE_TIME_MS);
 				flanco = true;
 			}
-			buttonReleased();
+			//buttonReleased();
 			break;
 
 		case BUTTON_FALLING:
@@ -43,7 +43,7 @@ void debounceFSM_update()
 					state = BUTTON_UP;
 				}
 			}
-			buttonPressed();
+			//buttonPressed();
 			break;
 
 		case BUTTON_DOWN:
@@ -51,7 +51,7 @@ void debounceFSM_update()
 				state = BUTTON_RAISING;
 				delayInit(&delay, ANTIBOUNCE_TIME_MS);
 			}
-			buttonPressed();
+			//buttonPressed();
 			break;
 
 		case BUTTON_RAISING:
@@ -62,7 +62,7 @@ void debounceFSM_update()
 					state = BUTTON_DOWN;
 				}
 			}
-			buttonReleased();
+			//buttonReleased();
 			break;
 	}
 }
