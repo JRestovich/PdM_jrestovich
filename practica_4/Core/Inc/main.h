@@ -52,6 +52,8 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+void buttonPressed();			  // debe encender el LED
+void buttonReleased();		  // debe apagar el LED 
 
 /* USER CODE END EFP */
 

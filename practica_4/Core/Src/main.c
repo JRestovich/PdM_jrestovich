@@ -18,7 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "API_delay.h"
+#include "API_debounce.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -33,7 +33,6 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define SEMIPERIODOS 2
-
 typedef enum tagTimes {
 	_500Miliseconds = 500U,
 	_100Miliseconds = 100U,
@@ -64,13 +63,6 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-delay_t delay;
-uint8_t contador;
-uint8_t tiempo_idx = 0;
-const uint32_t TIEMPOS[] = {_500Miliseconds, _100Miliseconds, _100Miliseconds, _1000Miliseconds};
-
-
 /* USER CODE END 0 */
 
 /**
@@ -103,34 +95,34 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
-  delayInit(&delay, TIEMPOS[0]);
   /* USER CODE END 2 */
+
+  debounceFSM_init();
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
+	  debounceFSM_update();
 
-    if (delayRead(&delay)) {
-      HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-      contador++;
-      if (contador >= SEMIPERIODOS) {
-        tiempo_idx++;
-        contador = 0;
-        if (tiempo_idx >= sizeof(TIEMPOS) / sizeof(TIEMPOS[0])) {
-          tiempo_idx = 01;
-		    }
-
-        if (!delayIsRunning(&delay)) {
-          delayWrite(&delay, TIEMPOS[tiempo_idx]);
-        }
-      }
-    }
-    /* USER CODE BEGIN 3 */
+	  // Punto 1
+	  if (debounceFSM_getState() == BUTTON_UP) {
+		  buttonReleased();
+	  } else if(debounceFSM_getState() == BUTTON_DOWN) {
+		  buttonPressed();
+	  }
   }
   /* USER CODE END 3 */
+}
+
+void buttonPressed()
+{
+	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+}
+
+void buttonReleased()
+{
+	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 }
 
 /**
