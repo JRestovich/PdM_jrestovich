@@ -55,7 +55,7 @@ void cmdPoll(void) {
 			status = CMD_ERR_OVERFLOW;
 		} else if (rx == '\n' || rx == '\r') {
 			state = CMD_PROCESS;
-			buffer[index] = rx;
+			buffer[index] = '\0';
 		} else {
 			buffer[index] = rx;
 		}
