@@ -8,14 +8,22 @@
 #include "API_cmdparser.h"
 #include "API_uart.h"
 #include <string.h>
+#include "stm32f4xx_hal.h"
 
 #define BUFFER_SIZE 256
+
+#define B1_Pin GPIO_PIN_13
+#define B1_GPIO_Port GPIOC
+#define LD2_Pin GPIO_PIN_5
+#define LD2_GPIO_Port GPIOA
 
 static const char helpCmd[] = "HELP";
 static const char ledOnCmd[] = "LED ON";
 static const char ledOffCmd[] = "LED OFF";
 static const char ledToggleCmd[] = "LED TOGGLE";
 static const char statusCmd[] = "STATUS";
+static const char ledOnTx[] = "LED is ON";
+static const char ledOffTx[] = "LED is OFF";
 
 static cmdParser_state_t state;
 static cmd_status_t status = CMD_OK;
@@ -81,13 +89,18 @@ void cmdPoll(void) {
 		if (strcmp((char *)buffer, helpCmd) == 0) {
 			cmdPrintHelp();
 		} else if (strcmp((char *)buffer, ledOnCmd) == 0) {
-
+			HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
 		} else if (strcmp((char *)buffer, ledOffCmd) == 0) {
-
+			HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 		} else if (strcmp((char *)buffer, ledToggleCmd) == 0) {
-
+			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 		} else if (strcmp((char *)buffer, statusCmd) == 0) {
-
+			if(HAL_GPIO_ReadPin(LD2_GPIO_Port, LD2_Pin) == GPIO_PIN_RESET) {
+				uartSendString((uint8_t *)ledOffTx);
+			} else {
+				uartSendString((uint8_t *)ledOnTx);
+			}
+			uartSendString((uint8_t *)"\r\n");
 		} else {
 			state = CMD_ERROR;
 			status = CMD_ERR_ARG;
