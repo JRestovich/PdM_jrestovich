@@ -11,6 +11,7 @@
 #include "stm32f4xx_hal.h"
 
 #define BUFFER_SIZE 256
+#define LOWER_TO_UPPER 32
 
 #define B1_Pin GPIO_PIN_13
 #define B1_GPIO_Port GPIOC
@@ -32,6 +33,7 @@ static uint8_t buffer[BUFFER_SIZE];
 static uint8_t idx = 0;
 
 static bool_t cmdProcessLine(void);
+static void strToUpper(uint8_t *str);
 
 void cmdParserInit(void) {
 	if (uartInit()) {
@@ -139,5 +141,21 @@ bool_t cmdProcessLine(void) {
 	} else if (buffer[0] == '/' && buffer[1] == '/') {
 		return false;
 	}
+	strToUpper(buffer);
 	return true;
+}
+
+static void strToUpper(uint8_t *str)
+{
+	if (str == NULL) {
+		return;
+	}
+	uint8_t i = 0;
+
+	while (str[i] != '\0') {
+		if(str[i] >= 'a' && str[i] <= 'z') {
+			buffer[i] = buffer[i] - LOWER_TO_UPPER;
+		}
+		i++;
+	}
 }
