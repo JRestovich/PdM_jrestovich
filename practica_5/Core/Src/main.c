@@ -18,8 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "API_delay.h"
-#include "API_debounce.h"
+#include "API_cmdparser.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -33,12 +32,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define SEMIPERIODOS 2
-typedef enum tagTimes {
-	_500Miliseconds = 500U,
-	_100Miliseconds = 100U,
-	_1000Miliseconds = 1000U
-} Times;
 
 /* USER CODE END PD */
 
@@ -63,10 +56,6 @@ static void MX_GPIO_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 /* USER CODE END 0 */
-delay_t delay;
-uint8_t contador;
-uint8_t tiempo_idx = 0;
-const uint32_t TIEMPOS[] = {500, 100};
 
 /**
   * @brief  The application entry point.
@@ -99,34 +88,13 @@ int main(void)
   /* USER CODE BEGIN 2 */
   /* USER CODE END 2 */
 
-  delayInit(&delay, TIEMPOS[0]);
-  debounceFSM_init();
+  cmdParserInit();
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  debounceFSM_update();
-
-	  // Punto 1
-	  /*if (debounceFSM_getState() == BUTTON_UP) {
-		  buttonReleased();
-	  } else if(debounceFSM_getState() == BUTTON_DOWN) {
-		  buttonPressed();
-	  }*/
-
-	  // Punto 2
-	  if (readKey()) {
-		  tiempo_idx++;
-		  if (tiempo_idx >= sizeof(TIEMPOS) / sizeof(TIEMPOS[0])) {
-			  tiempo_idx = 0;
-		  }
-		  delayWrite(&delay, TIEMPOS[tiempo_idx]);
-	  }
-
-	  if (delayRead(&delay)) {
-	        HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	  }
+	  cmdPoll();
   }
   /* USER CODE END 3 */
 }
