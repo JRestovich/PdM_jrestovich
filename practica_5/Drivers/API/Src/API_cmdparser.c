@@ -16,7 +16,7 @@ static cmd_status_t status = CMD_OK;
 static uint8_t buffer[BUFFER_SIZE];
 static uint8_t index = 0;
 
-static void cmdProcessLine(void);
+static bool_t cmdProcessLine(void);
 
 void cmdParserInit(void) {
 	if (uartInit()) {
@@ -62,7 +62,12 @@ void cmdPoll(void) {
 		break;
 
 	case CMD_PROCESS:
-		cmdProcessLine();
+		if (!cmdProcessLine()) {
+			state = CMD_ERROR;
+			status = CMD_OK;
+		} else {
+			state = CMD_EXEC;
+		}
 		break;
 
 	case CMD_EXEC:
@@ -85,12 +90,11 @@ void cmdPrintHelp(void) {
 }
 
 
-void cmdProcessLine(void) {
+bool_t cmdProcessLine(void) {
 	if (buffer[0] == '#') {
-		state = CMD_ERROR;
-		status = CMD_OK;
+		return false;
 	} else if (buffer[0] == '/' && buffer[1] == '/') {
-		state = CMD_ERROR;
-		status = CMD_OK;
+		return false;
 	}
+	return true;
 }
