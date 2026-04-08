@@ -1,8 +1,11 @@
-/*
- * API_cmdparser.c
+/**
+ * @file API_cmdparser.c
+ * @brief Implementacion del parser de comandos por UART.
  *
- *  Created on: Apr 8, 2026
- *      Author: joaquin
+ * El modulo recibe caracteres individuales por UART, arma una linea de
+ * comando en un buffer interno y la procesa mediante una maquina de
+ * estados. Los comandos validos permiten consultar ayuda y controlar el
+ * LED de usuario de la placa.
  */
 
 #include "API_cmdparser.h"
@@ -135,6 +138,17 @@ void cmdPrintHelp(void) {
 }
 
 
+/**
+ * @brief Determina si la linea recibida es ejecutable.
+ *
+ * Las lineas que comienzan con `#` o `//` se interpretan como entradas no
+ * validas para ejecucion. En los demas casos se normaliza el texto a
+ * mayusculas y se habilita su comparacion con el conjunto de comandos
+ * soportados.
+ *
+ * @return true si la linea puede pasar a ejecucion.
+ * @return false si la linea debe rechazarse.
+ */
 bool_t cmdProcessLine(void) {
 	if (buffer[0] == '#') {
 		return false;
@@ -145,6 +159,11 @@ bool_t cmdProcessLine(void) {
 	return true;
 }
 
+/**
+ * @brief Convierte a mayusculas los caracteres alfabeticos de una cadena.
+ *
+ * @param str Puntero a la cadena a convertir.
+ */
 static void strToUpper(uint8_t *str)
 {
 	if (str == NULL) {
