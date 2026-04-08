@@ -15,8 +15,8 @@
 #define MAX_SIZE 256
 UART_HandleTypeDef huart2;
 
-static HAL_StatusTypeDef uartStatus = false;
-static bool_t rxReady = false;
+static HAL_StatusTypeDef txStatus = HAL_ERROR;
+static HAL_StatusTypeDef rxStatus = HAL_ERROR;
 
 bool_t uartInit()
 {
@@ -54,7 +54,7 @@ void uartSendString(uint8_t * pstring)
 	if (pstring == NULL) {
 		return;
 	}
-	uartStatus = HAL_UART_Transmit(&huart2, pstring, strlen((char*)pstring), TIMEOUT_UART2);
+	txStatus = HAL_UART_Transmit(&huart2, pstring, strlen((char*)pstring), TIMEOUT_UART2);
 }
 
 void uartSendStringSize(uint8_t * pstring, uint16_t size)
@@ -65,17 +65,23 @@ void uartSendStringSize(uint8_t * pstring, uint16_t size)
 	if (size < MIN_SIZE || size >= MAX_SIZE) {
 		return;
 	}
-	uartStatus = HAL_UART_Transmit(&huart2, pstring, size, TIMEOUT_UART2);
+	txStatus = HAL_UART_Transmit(&huart2, pstring, size, TIMEOUT_UART2);
 }
 
 void uartReceiveStringSize(uint8_t * pstring, uint16_t size)
 {
-	rxReady = false;
+	rxStatus = false;
 	if (pstring == NULL) {
 		return;
 	}
 
-	if (HAL_UART_Receive (&huart2, pstring, size,TIMEOUT_UART2) == HAL_OK){
-		rxReady = true;
+	rxStatus = HAL_UART_Receive (&huart2, pstring, size,TIMEOUT_UART2);
+}
+
+bool_t uartReceiveOk() {
+	if (rxStatus == HAL_OK){
+		return true;
+	} else {
+		return false;
 	}
 }
