@@ -7,14 +7,21 @@
 
 #include "API_cmdparser.h"
 #include "API_uart.h"
+#include <string.h>
 
 #define BUFFER_SIZE 256
+
+static const char helpCmd[] = "HELP";
+static const char ledOnCmd[] = "LED ON";
+static const char ledOffCmd[] = "LED OFF";
+static const char ledToggleCmd[] = "LED TOGGLE";
+static const char statusCmd[] = "STATUS";
 
 static cmdParser_state_t state;
 static cmd_status_t status = CMD_OK;
 
 static uint8_t buffer[BUFFER_SIZE];
-static uint8_t index = 0;
+static uint8_t idx = 0;
 
 static bool_t cmdProcessLine(void);
 
@@ -38,8 +45,8 @@ void cmdPoll(void) {
 		}
 
 		if (rx != '\n' && rx != '\r') {
-			index = 0;
-			buffer[index] = rx;
+			idx = 0;
+			buffer[idx] = rx;
 			state = CMD_RECEIVING;
 		}
 		break;
@@ -49,15 +56,15 @@ void cmdPoll(void) {
 		if (!uartReceiveOk()) {
 			return;
 		}
-		index++;
-		if (index >= BUFFER_SIZE) {
+		idx++;
+		if (idx >= BUFFER_SIZE) {
 			state = CMD_ERROR;
 			status = CMD_ERR_OVERFLOW;
 		} else if (rx == '\n' || rx == '\r') {
 			state = CMD_PROCESS;
-			buffer[index] = '\0';
+			buffer[idx] = '\0';
 		} else {
-			buffer[index] = rx;
+			buffer[idx] = rx;
 		}
 		break;
 
@@ -71,7 +78,20 @@ void cmdPoll(void) {
 		break;
 
 	case CMD_EXEC:
-		// do action
+		if (strcmp((char *)buffer, helpCmd) == 0) {
+			cmdPrintHelp();
+		} else if (strcmp((char *)buffer, ledOnCmd) == 0) {
+
+		} else if (strcmp((char *)buffer, ledOffCmd) == 0) {
+
+		} else if (strcmp((char *)buffer, ledToggleCmd) == 0) {
+
+		} else if (strcmp((char *)buffer, statusCmd) == 0) {
+
+		} else {
+			state = CMD_ERROR;
+			status = CMD_ERR_ARG;
+		}
 		state = CMD_IDLE;
 		break;
 
