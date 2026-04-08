@@ -106,7 +106,17 @@ void cmdPoll(void) {
 }
 
 void cmdPrintHelp(void) {
-
+	uartSendString((uint8_t *)"Available commands:\r\n");
+	uartSendString((uint8_t *)helpCmd);
+	uartSendString((uint8_t *)"\r\n");
+	uartSendString((uint8_t *)ledOnCmd);
+	uartSendString((uint8_t *)"\r\n");
+	uartSendString((uint8_t *)ledOffCmd);
+	uartSendString((uint8_t *)"\r\n");
+	uartSendString((uint8_t *)ledToggleCmd);
+	uartSendString((uint8_t *)"\r\n");
+	uartSendString((uint8_t *)statusCmd);
+	uartSendString((uint8_t *)"\r\n");
 }
 
 
