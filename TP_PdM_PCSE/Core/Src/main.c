@@ -19,18 +19,20 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "API_led.h"
 #include "API_delay.h"
 
 /* Private define ------------------------------------------------------------*/
-#define DEBOUNCE_MS 30U
 
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart2;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+bool_t uartInit();
 
 /* Private user code ---------------------------------------------------------*/
 
@@ -51,6 +53,8 @@ int main(void)
 	HAL_Init();
 	SystemClock_Config();
 
+	uartInit();
+
     while (1)
     {
     	if (delayRead(&delay)) {
@@ -58,14 +62,17 @@ int main(void)
     		case 0:
     			API_LED_SetMode(&ledPlaquita, FIX);
     			API_LED_On(&ledPlaquita);
+    			printf("Led FIX\n");
     			break;
     		case 1:
     			API_LED_SetMode(&ledPlaquita, BLINK);
 				API_LED_SetBlinkFreq(&ledPlaquita, 1);
+				printf("Led BLINK at 1Hz\n");
 				break;
     		case 2:
     			API_LED_SetMode(&ledPlaquita, BLINK);
 				API_LED_SetBlinkFreq(&ledPlaquita, 10);
+				printf("Led BLINK at 10Hz\n");
 				break;
 			default:
 				break;
@@ -127,6 +134,45 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+
+bool_t uartInit()
+{
+	huart2.Instance = USART2;
+	huart2.Init.BaudRate = 115200;
+	huart2.Init.WordLength = UART_WORDLENGTH_8B;
+	huart2.Init.StopBits = UART_STOPBITS_1;
+	huart2.Init.Parity = UART_PARITY_NONE;
+	huart2.Init.Mode = UART_MODE_TX_RX;
+	huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+
+	if (HAL_UART_Init(&huart2) != HAL_OK) {
+		return false;
+	} else {
+		char buffer[200];
+		sprintf(buffer,
+		        "UART Configurated:\r\n"
+		        "\tBaudRate: %lu\r\n"
+		        "\tWordLength: %lu\r\n"
+		        "\tStopBits: %lu\r\n"
+		        "\tParity: %lu\r\n",
+		        huart2.Init.BaudRate,
+		        huart2.Init.WordLength,
+		        huart2.Init.StopBits,
+		        huart2.Init.Parity);
+
+//		uartSendStringSize((uint8_t*)buffer, strlen(buffer));
+		HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
+	    return true;
+	}
+}
+
+int _write(int file, char *ptr, int len)
+{
+    HAL_UART_Transmit(&huart2, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+    return len;
 }
 
 /**
