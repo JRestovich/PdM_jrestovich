@@ -1,14 +1,22 @@
-/*
- * API_led.c
+/**
+ * @file API_led.c
+ * @brief Implementacion del modulo de control de LEDs.
  *
- *  Created on: Apr 10, 2026
- *      Author: joaquin
+ * Este archivo define la logica interna necesaria para operar LEDs mediante
+ * GPIOs, incluyendo la inicializacion del hardware y el control temporal
+ * del parpadeo.
  */
 
 #include "API_led.h"
 
-#define FREQ_1Hz 1000
+#define FREQ_1Hz 1
 
+/**
+ * @brief Habilita los clocks de los puertos GPIO utilizados por el modulo.
+ *
+ * Activa los relojes de los puertos GPIO necesarios para poder configurar y
+ * operar los LEDs.
+ */
 void _initPortClock(void);
 
 void API_LED_Init(led_t* led, GPIO_TypeDef *port, uint16_t pin) {
@@ -32,7 +40,7 @@ void API_LED_Init(led_t* led, GPIO_TypeDef *port, uint16_t pin) {
 	HAL_GPIO_Init(port, &GPIO_InitStruct);
 
 	led->mode = FIX;
-	delayInit(&led->delay, FREQ_1Hz);
+	API_LED_SetBlinkFreq(led, FREQ_1Hz);
 }
 
 void API_LED_On(led_t* led) {
