@@ -50,11 +50,13 @@ int main(void)
     	//API_LED_Toggle(&ledPlaquita);
     	//HAL_Delay(500);
 
-    	API_LED_Off(&ledPlaquita);
-		HAL_Delay(500);
+    	//API_LED_Off(&ledPlaquita);
+		//HAL_Delay(500);
+		//API_LED_On(&ledPlaquita);
+		//HAL_Delay(500);
 
-		API_LED_On(&ledPlaquita);
-		HAL_Delay(500);
+    	API_LED_SetMode(&ledPlaquita, BLINK);
+		API_LED_Engine(&ledPlaquita);
     }
 
 }
