@@ -81,6 +81,24 @@ void API_LED_SetMode(led_t* led, led_mode_e mode) {
 	API_LED_Off(led);
 }
 
+void API_LED_SetBlinkFreq(led_t* led, uint32_t freq) {
+	uint32_t halfPeriodMs;
+
+	if (led == NULL) {
+		return;
+	}
+	if (freq == 0U) {
+		return;
+	}
+
+	halfPeriodMs = 1000U / (2U * freq);
+	if (halfPeriodMs == 0U) {
+		halfPeriodMs = 1U;
+	}
+
+	delayWrite(&led->delay, halfPeriodMs);
+}
+
 void _initPortClock(void) {
 	  /* GPIO Ports Clock Enable */
 	  __HAL_RCC_GPIOC_CLK_ENABLE();

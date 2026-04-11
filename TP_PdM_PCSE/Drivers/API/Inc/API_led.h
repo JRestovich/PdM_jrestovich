@@ -29,5 +29,6 @@ void API_LED_Off(led_t* led);
 void API_LED_Toggle(led_t* led);
 void API_LED_Engine(led_t* led);
 void API_LED_SetMode(led_t* led, led_mode_e mode);
+void API_LED_SetBlinkFreq(led_t* led, uint32_t freq);
 
 #endif /* API_INC_API_LED_H_ */

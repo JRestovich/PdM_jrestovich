@@ -21,6 +21,7 @@
 #include <stdbool.h>
 
 #include "API_led.h"
+#include "API_delay.h"
 
 /* Private define ------------------------------------------------------------*/
 #define DEBOUNCE_MS 30U
@@ -39,6 +40,11 @@ void SystemClock_Config(void);
   */
 int main(void)
 {
+	delay_t delay;
+	delayInit(&delay, 5000);
+
+	uint8_t i = 0;
+
 	led_t ledPlaquita;
 	API_LED_Init(&ledPlaquita, LD2_GPIO_Port, LD2_Pin);
 
@@ -47,15 +53,30 @@ int main(void)
 
     while (1)
     {
-    	//API_LED_Toggle(&ledPlaquita);
-    	//HAL_Delay(500);
+    	if (delayRead(&delay)) {
+    		switch (i) {
+    		case 0:
+    			API_LED_SetMode(&ledPlaquita, FIX);
+    			API_LED_On(&ledPlaquita);
+    			break;
+    		case 1:
+    			API_LED_SetMode(&ledPlaquita, BLINK);
+				API_LED_SetBlinkFreq(&ledPlaquita, 1);
+				break;
+    		case 2:
+    			API_LED_SetMode(&ledPlaquita, BLINK);
+				API_LED_SetBlinkFreq(&ledPlaquita, 10);
+				break;
+			default:
+				break;
+    		}
 
-    	//API_LED_Off(&ledPlaquita);
-		//HAL_Delay(500);
-		//API_LED_On(&ledPlaquita);
-		//HAL_Delay(500);
+    		i++;
+    		if (i >= 3) {
+    			i=0;
+    		}
+		}
 
-    	API_LED_SetMode(&ledPlaquita, BLINK);
 		API_LED_Engine(&ledPlaquita);
     }
 
