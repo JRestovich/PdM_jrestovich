@@ -20,6 +20,8 @@
 #include "main.h"
 #include <stdbool.h>
 
+#include "API_led.h"
+
 /* Private define ------------------------------------------------------------*/
 #define DEBOUNCE_MS 30U
 
@@ -28,7 +30,6 @@ UART_HandleTypeDef huart2;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 
@@ -38,17 +39,24 @@ static void MX_GPIO_Init(void);
   */
 int main(void)
 {
-  HAL_Init();
-  SystemClock_Config();
-  MX_GPIO_Init();
+	led_t ledPlaquita;
+	API_LED_Init(&ledPlaquita, LD2_GPIO_Port, LD2_Pin);
 
-  while (1)
-  {
-	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	  HAL_Delay(500);
+	HAL_Init();
+	SystemClock_Config();
 
-  }
-  /* USER CODE END 3 */
+    while (1)
+    {
+    	//API_LED_Toggle(&ledPlaquita);
+    	//HAL_Delay(500);
+
+    	API_LED_Off(&ledPlaquita);
+		HAL_Delay(500);
+
+		API_LED_On(&ledPlaquita);
+		HAL_Delay(500);
+    }
+
 }
 
 /**
@@ -97,43 +105,6 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
-
-/**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_GPIO_Init(void)
-{
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin : B1_Pin */
-  GPIO_InitStruct.Pin = B1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : LD2_Pin */
-  GPIO_InitStruct.Pin = LD2_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
-
-}
-
-/* USER CODE BEGIN 4 */
-
-/* USER CODE END 4 */
 
 /**
   * @brief  This function is executed in case of error occurrence.
