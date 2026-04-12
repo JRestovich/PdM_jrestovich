@@ -21,7 +21,7 @@ typedef struct {
 	uint32_t offset;
 	uint32_t scale;
 	uint32_t timeout;
-	bool_t configOk
+	bool_t configOk;
 } adc_t;
 
 bool API_adc_init(adc_t *adc,
@@ -31,6 +31,7 @@ bool API_adc_init(adc_t *adc,
 				GPIO_TypeDef* port,
 				uint32_t pin);
 void API_adc_triggerConversion(adc_t *adc, uint32_t timeout);
-uint32_t API_adc_readPolling(adc_t *adc);
+bool_t API_adc_convertionReady(adc_t *adc);
+bool_t API_adc_readPolling(adc_t *adc, uint32_t* value);
 
 #endif /* API_INC_API_ADC_H_ */

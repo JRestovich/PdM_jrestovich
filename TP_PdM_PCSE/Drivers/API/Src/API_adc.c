@@ -37,23 +37,32 @@ bool API_adc_init(adc_t *adc,
 }
 
 void API_adc_triggerConversion(adc_t *adc, uint32_t timeout) {
-	if (adc == NULL) {
+	if (adc == NULL || !adc->configOk) {
 		return;
 	}
 
 	adc->timeout = timeout;
+	HAL_ADC_Start(&adc->hadc);
 }
 
-uint32_t API_adc_readPolling(adc_t *adc) {
-	if (adc == NULL) {
-		return 0U;
+bool_t API_adc_convertionReady(adc_t *adc) {
+	if (adc == NULL || !adc->configOk) {
+		return false;
+	}
+	return HAL_ADC_PollForConversion(&adc->hadc, adc->timeout) == HAL_OK;
+}
+
+bool_t API_adc_readPolling(adc_t *adc, uint32_t* value) {
+	if (adc == NULL || !adc->configOk) {
+		return false;
 	}
 
-	if (HAL_ADC_PollForConversion(&adc->hadc, adc->timeout) != HAL_OK) {
-		return 0U;
+	if (!API_adc_convertionReady(adc)) {
+		return false;
 	}
 
-	return HAL_ADC_GetValue(&adc->hadc);
+	*value = HAL_ADC_GetValue(&adc->hadc);
+	return true;
 }
 
 bool_t defaultConfig(ADC_HandleTypeDef* hadc) {
@@ -61,7 +70,7 @@ bool_t defaultConfig(ADC_HandleTypeDef* hadc) {
 	hadc->Init.Resolution = ADC_RESOLUTION_12B;
 	hadc->Init.DataAlign = ADC_DATAALIGN_RIGHT;
 	hadc->Init.ScanConvMode = DISABLE;
-	hadc->Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+	hadc->Init.EOCSelection = ADC_EOC_SEQ_CONV;
 	hadc->Init.ContinuousConvMode = ENABLE;
 	hadc->Init.NbrOfConversion = 1;
 	hadc->Init.DiscontinuousConvMode = DISABLE;

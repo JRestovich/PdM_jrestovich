@@ -22,8 +22,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "API_led.h"
-#include "API_delay.h"
 #include "API_adc.h"
 
 /* Private define ------------------------------------------------------------*/
@@ -46,14 +44,6 @@ int main(void)
 	HAL_Init();
 	SystemClock_Config();
 
-	delay_t delay;
-	delayInit(&delay, 500);
-
-	uint8_t i = 0;
-
-	led_t ledPlaquita;
-	API_LED_Init(&ledPlaquita, LD2_GPIO_Port, LD2_Pin);
-
 	adc_t tempSensor;
 	API_adc_init(&tempSensor,
         ADC1,
@@ -67,38 +57,13 @@ int main(void)
 
 	uartInit();
 
+	uint32_t value;
+
     while (1)
     {
-    	if (delayRead(&delay)) {
-    		printf("Temp sensor: %ld \n", API_adc_readPolling(&tempSensor));
-        API_adc_triggerConversion(&tempSensor, 1000);
-//    		switch (i) {
-//    		case 0:
-//    			API_LED_SetMode(&ledPlaquita, FIX);
-//    			API_LED_On(&ledPlaquita);
-//    			printf("Led FIX\n");
-//    			break;
-//    		case 1:
-//    			API_LED_SetMode(&ledPlaquita, BLINK);
-//				API_LED_SetBlinkFreq(&ledPlaquita, 1);
-//				printf("Led BLINK at 1Hz\n");
-//				break;
-//    		case 2:
-//    			API_LED_SetMode(&ledPlaquita, BLINK);
-//				API_LED_SetBlinkFreq(&ledPlaquita, 10);
-//				printf("Led BLINK at 10Hz\n");
-//				break;
-//			default:
-//				break;
-//    		}
-//
-//    		i++;
-//    		if (i >= 3) {
-//    			i=0;
-//    		}
-		}
-
-		API_LED_Engine(&ledPlaquita);
+    	if (API_adc_readPolling(&tempSensor, &value)) {
+    		printf("Temp sensor: %ld \n", value);
+    	}
     }
 
 }
