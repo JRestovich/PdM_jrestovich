@@ -24,6 +24,7 @@
 
 #include "API_led.h"
 #include "API_delay.h"
+#include "API_adc.h"
 
 /* Private define ------------------------------------------------------------*/
 
@@ -42,15 +43,26 @@ bool_t uartInit();
   */
 int main(void)
 {
+	HAL_Init();
+	SystemClock_Config();
+
 	delay_t delay;
-	delayInit(&delay, 5000);
+	delayInit(&delay, 500);
 
 	uint8_t i = 0;
 
 	led_t ledPlaquita;
 	API_LED_Init(&ledPlaquita, LD2_GPIO_Port, LD2_Pin);
 
-	HAL_Init();
+	adc_t tempSensor;
+	API_adc_init(&tempSensor,
+        ADC1,
+        ADC_CHANNEL_TEMPSENSOR,
+        ADC_SAMPLETIME_480CYCLES,
+        GPIOA, 
+        GPIO_PIN_0);
+	API_adc_triggerConversion(&tempSensor, 1000);
+
 	SystemClock_Config();
 
 	uartInit();
@@ -58,30 +70,32 @@ int main(void)
     while (1)
     {
     	if (delayRead(&delay)) {
-    		switch (i) {
-    		case 0:
-    			API_LED_SetMode(&ledPlaquita, FIX);
-    			API_LED_On(&ledPlaquita);
-    			printf("Led FIX\n");
-    			break;
-    		case 1:
-    			API_LED_SetMode(&ledPlaquita, BLINK);
-				API_LED_SetBlinkFreq(&ledPlaquita, 1);
-				printf("Led BLINK at 1Hz\n");
-				break;
-    		case 2:
-    			API_LED_SetMode(&ledPlaquita, BLINK);
-				API_LED_SetBlinkFreq(&ledPlaquita, 10);
-				printf("Led BLINK at 10Hz\n");
-				break;
-			default:
-				break;
-    		}
-
-    		i++;
-    		if (i >= 3) {
-    			i=0;
-    		}
+    		printf("Temp sensor: %ld \n", API_adc_readPolling(&tempSensor));
+        API_adc_triggerConversion(&tempSensor, 1000);
+//    		switch (i) {
+//    		case 0:
+//    			API_LED_SetMode(&ledPlaquita, FIX);
+//    			API_LED_On(&ledPlaquita);
+//    			printf("Led FIX\n");
+//    			break;
+//    		case 1:
+//    			API_LED_SetMode(&ledPlaquita, BLINK);
+//				API_LED_SetBlinkFreq(&ledPlaquita, 1);
+//				printf("Led BLINK at 1Hz\n");
+//				break;
+//    		case 2:
+//    			API_LED_SetMode(&ledPlaquita, BLINK);
+//				API_LED_SetBlinkFreq(&ledPlaquita, 10);
+//				printf("Led BLINK at 10Hz\n");
+//				break;
+//			default:
+//				break;
+//    		}
+//
+//    		i++;
+//    		if (i >= 3) {
+//    			i=0;
+//    		}
 		}
 
 		API_LED_Engine(&ledPlaquita);
