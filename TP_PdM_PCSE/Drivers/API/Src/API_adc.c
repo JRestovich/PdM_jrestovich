@@ -3,16 +3,18 @@
 void initAdcClock(ADC_HandleTypeDef* hadc);
 void initAdcHw(ADC_HandleTypeDef* hadc, uint32_t channel, GPIO_TypeDef* port, uint32_t pin);
 
-bool API_adc(adc_t *adc,
-			 ADC_TypeDef* instance,
-			 uint32_t channel,
-			 uint32_t samplingTime) {
+bool API_adc_init(adc_t *adc,
+				ADC_TypeDef* instance,
+				uint32_t channel,
+				uint32_t samplingTime,
+				GPIO_TypeDef* port,
+				uint32_t pin) {
 	if (adc == NULL || instance == NULL) {
 		return false;
 	}
 
 	adc->hadc.Instance = instance;
-	initAdcHw(&adc->hadc, channel, GPIOA, GPIO_PIN_0);
+	initAdcHw(&adc->hadc, channel, port, pin);
 
 	initAdcClock(&adc->hadc);
 

@@ -21,10 +21,12 @@ typedef struct {
 	uint32_t timeout;
 } adc_t;
 
-bool API_adc(adc_t *adc,
-			 ADC_TypeDef* instance,
-			 uint32_t channel,
-			 uint32_t samplingTime);
+bool API_adc_init(adc_t *adc,
+				ADC_TypeDef* instance,
+				uint32_t channel,
+				uint32_t samplingTime,
+				GPIO_TypeDef* port,
+				uint32_t pin);
 void API_adc_triggerConversion(adc_t *adc, uint32_t timeout);
 uint32_t API_adc_readPolling(adc_t *adc);
 
