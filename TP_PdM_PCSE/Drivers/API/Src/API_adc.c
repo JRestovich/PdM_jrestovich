@@ -2,6 +2,7 @@
 
 void initAdcClock(ADC_HandleTypeDef* hadc);
 void initAdcHw(ADC_HandleTypeDef* hadc, uint32_t channel, GPIO_TypeDef* port, uint32_t pin);
+bool_t defaultConfig(ADC_HandleTypeDef* hadc);
 
 bool API_adc_init(adc_t *adc,
 				ADC_TypeDef* instance,
@@ -12,27 +13,13 @@ bool API_adc_init(adc_t *adc,
 	if (adc == NULL || instance == NULL) {
 		return false;
 	}
-
+	adc->configOk = false;
 	adc->hadc.Instance = instance;
 	initAdcHw(&adc->hadc, channel, port, pin);
 
 	initAdcClock(&adc->hadc);
 
-	adc->hadc.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
-	adc->hadc.Init.Resolution = ADC_RESOLUTION_12B;
-	adc->hadc.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-	adc->hadc.Init.ScanConvMode = DISABLE;
-	adc->hadc.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-	adc->hadc.Init.ContinuousConvMode = ENABLE;
-	adc->hadc.Init.NbrOfConversion = 1;
-	adc->hadc.Init.DiscontinuousConvMode = DISABLE;
-	adc->hadc.Init.NbrOfDiscConversion = 0;
-	adc->hadc.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-	adc->hadc.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-	adc->hadc.Init.DMAContinuousRequests = DISABLE;
-	adc->timeout = HAL_MAX_DELAY;
-
-	if (HAL_ADC_Init(&adc->hadc) != HAL_OK) {
+	if(!defaultConfig(&adc->hadc)) {
 		return false;
 	}
 
@@ -41,7 +28,12 @@ bool API_adc_init(adc_t *adc,
 	adc->channelConfig.SamplingTime = samplingTime;
 	adc->channelConfig.Offset = 0U;
 
-	return (HAL_ADC_ConfigChannel(&adc->hadc, &adc->channelConfig) == HAL_OK);
+	if (HAL_ADC_ConfigChannel(&adc->hadc, &adc->channelConfig) != HAL_OK) {
+		return false;
+	}
+
+	adc->configOk = true;
+	return true;
 }
 
 void API_adc_triggerConversion(adc_t *adc, uint32_t timeout) {
@@ -62,6 +54,23 @@ uint32_t API_adc_readPolling(adc_t *adc) {
 	}
 
 	return HAL_ADC_GetValue(&adc->hadc);
+}
+
+bool_t defaultConfig(ADC_HandleTypeDef* hadc) {
+	hadc->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
+	hadc->Init.Resolution = ADC_RESOLUTION_12B;
+	hadc->Init.DataAlign = ADC_DATAALIGN_RIGHT;
+	hadc->Init.ScanConvMode = DISABLE;
+	hadc->Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+	hadc->Init.ContinuousConvMode = ENABLE;
+	hadc->Init.NbrOfConversion = 1;
+	hadc->Init.DiscontinuousConvMode = DISABLE;
+	hadc->Init.NbrOfDiscConversion = 0;
+	hadc->Init.ExternalTrigConv = ADC_SOFTWARE_START;
+	hadc->Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+	hadc->Init.DMAContinuousRequests = DISABLE;
+
+	return HAL_ADC_Init(hadc) == HAL_OK;
 }
 
 void initAdcHw(ADC_HandleTypeDef* hadc, uint32_t channel, GPIO_TypeDef* port, uint32_t pin) {

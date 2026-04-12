@@ -13,12 +13,15 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef bool bool_t;
+
 typedef struct {
 	ADC_HandleTypeDef hadc;
 	ADC_ChannelConfTypeDef channelConfig;
 	uint32_t offset;
 	uint32_t scale;
 	uint32_t timeout;
+	bool_t configOk
 } adc_t;
 
 bool API_adc_init(adc_t *adc,
