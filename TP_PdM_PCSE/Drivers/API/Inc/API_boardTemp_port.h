@@ -16,7 +16,7 @@
 typedef bool bool_t;
 
 bool_t API_boardTemp_port_init(void);
-bool_t API_boardTemp_port_startConvertion(void) ;
+bool_t API_boardTemp_port_startConvertion(void);
 bool_t API_boardTemp_port_convertionReady(uint32_t timeout);
 
 #endif /* API_INC_API_BOARDTEMP_PORT_H_ */

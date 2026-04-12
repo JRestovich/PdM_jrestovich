@@ -13,13 +13,6 @@ static ADC_ChannelConfTypeDef chConfig;
 
 static bool_t handlerConfig(void);
 static void channelConfig(void);
-static void initAdcHw(void);
-
-//ADC1,
-//ADC_CHANNEL_TEMPSENSOR,
-//ADC_SAMPLETIME_480CYCLES,
-//GPIOA,
-//GPIO_PIN_0
 
 bool_t API_boardTemp_port_init(void) {
 
@@ -30,7 +23,6 @@ bool_t API_boardTemp_port_init(void) {
 		 return false;
 	 }
 	 channelConfig();
-	 initAdcHw();
 
 	 if (HAL_ADC_ConfigChannel(&hadc, &chConfig) != HAL_OK) {
 	 		return false;
@@ -80,15 +72,4 @@ static void channelConfig(void) {
 	chConfig.Rank = 1U;
 	chConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
 	chConfig.Offset = 0U;
-}
-
-static void initAdcHw(void) {
-    GPIO_InitTypeDef GPIO_InitStruct;
-
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-
-    GPIO_InitStruct.Pin = GPIO_PIN_0;
-	GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 }
