@@ -46,12 +46,10 @@ bool API_adc_init(adc_t *adc,
 
 void API_adc_triggerConversion(adc_t *adc, uint32_t timeout) {
 	if (adc == NULL) {
-		return false;
+		return;
 	}
 
 	adc->timeout = timeout;
-
-	HAL_ADC_Start(&adc->hadc) == HAL_OK;
 }
 
 uint32_t API_adc_readPolling(adc_t *adc) {
