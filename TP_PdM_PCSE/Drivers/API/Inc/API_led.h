@@ -1,9 +1,11 @@
 /**
  * @file API_led.h
- * @brief Interfaz publica del modulo de control de LEDs.
+ * @brief Interfaz publica de la logica de control de LEDs.
  *
- * Este archivo declara los tipos de datos y las funciones publicas necesarias
- * para inicializar y controlar LEDs conectados a GPIOs del microcontrolador.
+ * Este archivo declara la API de alto nivel del modulo de LEDs. La capa
+ * `API_led` administra el estado logico de cada LED, su modo de operacion y la
+ * temporizacion del parpadeo, delegando el acceso directo al hardware en el
+ * modulo `API_led_port`.
  */
 
 #ifndef API_INC_API_LED_H_
@@ -16,8 +18,8 @@
 /**
  * @brief Modos de funcionamiento disponibles para un LED.
  *
- * Define el comportamiento que adopta el LED al ser administrado por el
- * modulo, permitiendo funcionamiento fijo o intermitente.
+ * Define el comportamiento logico que adopta el LED al ser administrado por la
+ * API de alto nivel, permitiendo funcionamiento fijo o intermitente.
  */
 typedef enum {
 	FIX = 0,  ///< Mantiene el LED en estado fijo.
@@ -25,22 +27,23 @@ typedef enum {
 } led_mode_e;
 
 /**
- * @brief Estructura de configuracion y estado de un LED.
+ * @brief Estructura de configuracion y estado logico de un LED.
  *
- * Agrupa la informacion necesaria para identificar el GPIO asociado al LED,
- * almacenar su modo de operacion y gestionar la temporizacion del parpadeo.
+ * Agrupa el descriptor de hardware del LED y la informacion de control que
+ * utiliza la capa de logica para gestionar su modo de operacion y la
+ * temporizacion del parpadeo.
  */
 typedef struct {
-	led_port_t hwLed;
+	led_port_t hwLed;    ///< Descriptor de hardware administrado por `API_led_port`.
 	led_mode_e mode;     ///< Modo de funcionamiento actual del LED.
 	delay_t delay;       ///< Retardo utilizado para temporizar el parpadeo.
 } led_t;
 
 /**
- * @brief Inicializa la estructura y el hardware asociado a un LED.
+ * @brief Inicializa la logica del LED y su recurso de hardware asociado.
  *
- * Configura el pin indicado como salida digital, lo lleva al estado apagado
- * e inicializa los datos internos del modulo para operar el LED.
+ * Inicializa la estructura de control del LED, delega la configuracion fisica
+ * del GPIO al modulo `API_led_port` y deja cargado un parpadeo por defecto.
  *
  * @param led Puntero a la estructura del LED a inicializar.
  * @param port Puerto GPIO al que se encuentra conectado el LED.
@@ -49,27 +52,27 @@ typedef struct {
 void API_LED_Init(led_t* led, GPIO_TypeDef *port, uint16_t pin);
 
 /**
- * @brief Enciende el LED.
+ * @brief Solicita el encendido del LED.
  *
- * Fuerza el pin asociado al LED al estado logico alto.
+ * Ordena a la capa de port llevar el LED al estado encendido.
  *
  * @param led Puntero a la estructura del LED a encender.
  */
 void API_LED_On(led_t* led);
 
 /**
- * @brief Apaga el LED.
+ * @brief Solicita el apagado del LED.
  *
- * Fuerza el pin asociado al LED al estado logico bajo.
+ * Ordena a la capa de port llevar el LED al estado apagado.
  *
  * @param led Puntero a la estructura del LED a apagar.
  */
 void API_LED_Off(led_t* led);
 
 /**
- * @brief Conmuta el estado actual del LED.
+ * @brief Solicita la conmutacion del estado actual del LED.
  *
- * Invierte el nivel logico presente en el pin asociado al LED.
+ * Delega en la capa de port la inversion del estado fisico actual del LED.
  *
  * @param led Puntero a la estructura del LED a conmutar.
  */
@@ -78,8 +81,8 @@ void API_LED_Toggle(led_t* led);
 /**
  * @brief Ejecuta la logica de control periodico del LED.
  *
- * Atiende el comportamiento temporal del LED y realiza el parpadeo cuando el
- * modo configurado es intermitente.
+ * Atiende el comportamiento temporal del LED y, cuando el modo configurado es
+ * intermitente, decide cuando debe conmutarse el estado fisico del hardware.
  *
  * @param led Puntero a la estructura del LED a procesar.
  */
@@ -88,7 +91,7 @@ void API_LED_Engine(led_t* led);
 /**
  * @brief Configura el modo de funcionamiento del LED.
  *
- * Actualiza el modo de operacion del LED entre comportamiento fijo o
+ * Actualiza el modo logico de operacion del LED entre comportamiento fijo o
  * intermitente.
  *
  * @param led Puntero a la estructura del LED a configurar.
@@ -99,8 +102,8 @@ void API_LED_SetMode(led_t* led, led_mode_e mode);
 /**
  * @brief Configura la frecuencia de parpadeo del LED.
  *
- * Ajusta el retardo interno a partir de la frecuencia de parpadeo indicada
- * en Hertz.
+ * Ajusta el retardo interno utilizado por la logica de parpadeo a partir de la
+ * frecuencia indicada en Hertz.
  *
  * @param led Puntero a la estructura del LED a configurar.
  * @param freq Frecuencia de parpadeo deseada en Hertz.

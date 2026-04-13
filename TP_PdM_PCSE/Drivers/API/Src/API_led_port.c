@@ -1,10 +1,11 @@
 /**
- * @file API_LED_port.c
- * @brief Implementacion del modulo de control de LEDs.
+ * @file API_led_port.c
+ * @brief Implementacion de la capa de acceso a hardware para LEDs.
  *
- * Este archivo define la logica interna necesaria para operar LEDs mediante
- * GPIOs, incluyendo la inicializacion del hardware y el control temporal
- * del parpadeo.
+ * Este archivo implementa la capa de bajo nivel del modulo de LEDs. Aqui se
+ * concentra exclusivamente la configuracion y el manejo del hardware GPIO
+ * asociado a cada LED, sin incorporar logica de temporizacion ni de modos de
+ * funcionamiento.
  */
 
 /********************************************************/
@@ -18,12 +19,12 @@
 /********************************************************/
 
 /**
- * @brief Habilita los clocks de los puertos GPIO utilizados por el modulo.
+ * @brief Habilita el clock del puerto GPIO utilizado por el LED.
  *
- * Activa los relojes de los puertos GPIO necesarios para poder configurar y
- * operar los LEDs.
+ * Activa unicamente el reloj del puerto GPIO asociado al descriptor de
+ * hardware recibido para poder configurar y operar fisicamente ese LED.
  */
-static void _initPortClock(void);
+static void _initPortClock(led_port_t* led);
 
 /********************************************************/
 /* Implementacion de Funciones Publicas                 */
@@ -33,9 +34,10 @@ void API_LED_port_Init(led_port_t* led, GPIO_TypeDef *port, uint16_t pin) {
 	if (led == NULL) {
 		return;
 	}
-	_initPortClock();
+
     led->pin = pin;
     led->port = port;
+    _initPortClock(led);
 
 	GPIO_InitTypeDef GPIO_InitStruct;
 
@@ -75,11 +77,26 @@ void API_LED_port_Toggle(led_port_t* led) {
 /* Implementacion de Funciones Privadas                 */
 /********************************************************/
 
-static void _initPortClock(void) {
-	  /* GPIO Ports Clock Enable */
-	  __HAL_RCC_GPIOC_CLK_ENABLE();
-	  __HAL_RCC_GPIOH_CLK_ENABLE();
-	  __HAL_RCC_GPIOA_CLK_ENABLE();
-	  __HAL_RCC_GPIOB_CLK_ENABLE();
+static void _initPortClock(led_port_t* led) {
+	if (led == NULL || led->port == NULL) {
+		return;
+	}
 
+	if (led->port == GPIOA) {
+		__HAL_RCC_GPIOA_CLK_ENABLE();
+	} else if (led->port == GPIOB) {
+		__HAL_RCC_GPIOB_CLK_ENABLE();
+	} else if (led->port == GPIOC) {
+		__HAL_RCC_GPIOC_CLK_ENABLE();
+	} else if (led->port == GPIOD) {
+		__HAL_RCC_GPIOD_CLK_ENABLE();
+	} else if (led->port == GPIOE) {
+		__HAL_RCC_GPIOE_CLK_ENABLE();
+	} else if (led->port == GPIOF) {
+		__HAL_RCC_GPIOF_CLK_ENABLE();
+	} else if (led->port == GPIOG) {
+		__HAL_RCC_GPIOG_CLK_ENABLE();
+	} else if (led->port == GPIOH) {
+		__HAL_RCC_GPIOH_CLK_ENABLE();
+	}
 }

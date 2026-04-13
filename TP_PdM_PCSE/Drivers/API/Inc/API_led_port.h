@@ -1,9 +1,10 @@
 /**
  * @file API_led_port.h
- * @brief Interfaz publica del modulo de control de LEDs.
+ * @brief Interfaz publica de acceso a hardware para LEDs.
  *
- * Este archivo declara los tipos de datos y las funciones publicas necesarias
- * para inicializar y controlar LEDs conectados a GPIOs del microcontrolador.
+ * Este archivo declara la capa de port del modulo de LEDs. La responsabilidad
+ * de esta interfaz es encapsular el acceso al hardware GPIO utilizado para
+ * inicializar, encender, apagar y conmutar LEDs fisicos del microcontrolador.
  */
 
 #ifndef API_INC_API_LED_PORT_H_
@@ -12,10 +13,10 @@
 #include "stm32f4xx_hal.h"
 
 /**
- * @brief Estructura de configuracion y estado de un LED.
+ * @brief Descriptor de hardware asociado a un LED.
  *
- * Agrupa la informacion necesaria para identificar el GPIO asociado al LED,
- * almacenar su modo de operacion y gestionar la temporizacion del parpadeo.
+ * Agrupa la informacion fisica necesaria para identificar el GPIO conectado a
+ * un LED y operar sobre ese recurso desde la capa de port.
  */
 typedef struct {
 	GPIO_TypeDef *port;  ///< Puerto GPIO asociado al LED.
@@ -23,10 +24,10 @@ typedef struct {
 } led_port_t;
 
 /**
- * @brief Inicializa la estructura y el hardware asociado a un LED.
+ * @brief Inicializa el hardware asociado a un LED.
  *
- * Configura el pin indicado como salida digital, lo lleva al estado apagado
- * e inicializa los datos internos del modulo para operar el LED.
+ * Configura el pin indicado como salida digital, lo lleva al estado apagado y
+ * deja cargado el descriptor de hardware correspondiente.
  *
  * @param led Puntero a la estructura del LED a inicializar.
  * @param port Puerto GPIO al que se encuentra conectado el LED.
@@ -35,27 +36,29 @@ typedef struct {
 void API_LED_port_Init(led_port_t* led, GPIO_TypeDef *port, uint16_t pin);
 
 /**
- * @brief Enciende el LED.
+ * @brief Enciende fisicamente el LED.
  *
- * Fuerza el pin asociado al LED al estado logico alto.
+ * Fuerza el pin GPIO asociado al LED al nivel logico correspondiente al estado
+ * encendido.
  *
  * @param led Puntero a la estructura del LED a encender.
  */
 void API_LED_port_On(led_port_t* led);
 
 /**
- * @brief Apaga el LED.
+ * @brief Apaga fisicamente el LED.
  *
- * Fuerza el pin asociado al LED al estado logico bajo.
+ * Fuerza el pin GPIO asociado al LED al nivel logico correspondiente al estado
+ * apagado.
  *
  * @param led Puntero a la estructura del LED a apagar.
  */
 void API_LED_port_Off(led_port_t* led);
 
 /**
- * @brief Conmuta el estado actual del LED.
+ * @brief Conmuta fisicamente el estado actual del LED.
  *
- * Invierte el nivel logico presente en el pin asociado al LED.
+ * Invierte el nivel logico presente en el pin GPIO asociado al LED.
  *
  * @param led Puntero a la estructura del LED a conmutar.
  */

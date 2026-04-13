@@ -1,10 +1,11 @@
 /**
  * @file API_led.c
- * @brief Implementacion del modulo de control de LEDs.
+ * @brief Implementacion de la logica de control de LEDs.
  *
- * Este archivo define la logica interna necesaria para operar LEDs mediante
- * GPIOs, incluyendo la inicializacion del hardware y el control temporal
- * del parpadeo.
+ * Este archivo implementa la capa de alto nivel del modulo de LEDs. Aqui se
+ * resuelve la logica de operacion, el modo de funcionamiento y el temporizado
+ * del parpadeo, mientras que el acceso al hardware GPIO se abstrae a traves de
+ * `API_led_port`.
  */
 
 /********************************************************/
