@@ -11,6 +11,7 @@
 
 #include "stm32f4xx_hal.h"
 #include "API_delay.h"
+#include "API_led_port.h"
 
 /**
  * @brief Modos de funcionamiento disponibles para un LED.
@@ -30,8 +31,7 @@ typedef enum {
  * almacenar su modo de operacion y gestionar la temporizacion del parpadeo.
  */
 typedef struct {
-	GPIO_TypeDef *port;  ///< Puerto GPIO asociado al LED.
-	uint16_t pin;        ///< Pin GPIO asociado al LED.
+	led_port_t hwLed;
 	led_mode_e mode;     ///< Modo de funcionamiento actual del LED.
 	delay_t delay;       ///< Retardo utilizado para temporizar el parpadeo.
 } led_t;
