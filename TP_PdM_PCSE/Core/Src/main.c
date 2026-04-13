@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "API_adc.h"
+#include "API_boardTemp_port.h"
 
 /* Private define ------------------------------------------------------------*/
 
@@ -44,26 +44,29 @@ int main(void)
 	HAL_Init();
 	SystemClock_Config();
 
-	adc_t tempSensor;
-	API_adc_init(&tempSensor,
-        ADC1,
-        ADC_CHANNEL_TEMPSENSOR,
-        ADC_SAMPLETIME_480CYCLES,
-        GPIOA, 
-        GPIO_PIN_0);
-	API_adc_triggerConversion(&tempSensor, 1000);
+	if (!API_boardTemp_port_init()) {
+		Error_Handler();
+	}
 
-	SystemClock_Config();
+	if (!uartInit()) {
+		Error_Handler();
+	}
 
-	uartInit();
-
-	uint32_t value;
+	float temperatureC;
+	int32_t temperatureInt;
+	uint32_t temperatureFrac;
 
     while (1)
     {
-    	if (API_adc_readPolling(&tempSensor, &value)) {
-    		printf("Temp sensor: %ld \n", value);
+    	if (API_boardTemp_port_readCelsius(1000, &temperatureC)) {
+    		temperatureInt = (int32_t)temperatureC;
+    		temperatureFrac = (uint32_t)((temperatureC - (float)temperatureInt) * 100.0f);
+
+    		printf("MCU temp: %ld.%02lu C\r\n",
+    				(long)temperatureInt,
+    				(unsigned long)temperatureFrac);
     	}
+    	HAL_Delay(500);
     }
 
 }
