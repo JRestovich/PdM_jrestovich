@@ -11,6 +11,10 @@
 #define API_INC_API_LED_PORT_H_
 
 #include "stm32f4xx_hal.h"
+#include <stdbool.h>
+
+
+typedef bool bool_t;
 
 /**
  * @brief Descriptor de hardware asociado a un LED.
