@@ -18,3 +18,7 @@ bool_t API_intSensors_readTempCelsius(uint32_t timeout, float *temperatureC) {
 bool_t API_intSensors_readVoltMilliVolts(uint32_t timeout, uint32_t *voltageMv) {
 	return API_intSensors_port_readVoltMilliVolts(timeout, voltageMv);
 }
+
+bool_t API_intSensors_readAllSensors(uint32_t timeout,  float *temperatureC, uint32_t *voltageMv) {
+	return API_intSensors_port_readAllSensors(timeout, temperatureC, voltageMv);
+}

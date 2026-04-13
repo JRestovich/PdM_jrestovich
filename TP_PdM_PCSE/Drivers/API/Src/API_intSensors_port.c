@@ -106,6 +106,22 @@ bool_t API_intSensors_port_readVoltMilliVolts(uint32_t timeout, uint32_t *voltag
 	return true;
 }
 
+bool_t API_intSensors_port_readAllSensors(uint32_t timeout, float* temperatureC, uint32_t* voltageMv) {
+	uint32_t rawValueTemp, rawValueV;
+
+	if (!initOk || voltageMv == NULL) {
+		return false;
+	}
+
+	if (!readRawSequence(timeout, &rawValueTemp, &rawValueV)) {
+		return false;
+	}
+
+	*temperatureC = rawToCelsius(rawValueTemp);
+	*voltageMv = rawToMilliVolts(rawValueV);
+	return true;
+}
+
 static bool_t handlerConfig(void) {
 	hadc.Instance = ADC1;
 

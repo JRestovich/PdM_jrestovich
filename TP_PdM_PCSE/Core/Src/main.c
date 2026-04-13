@@ -59,8 +59,7 @@ int main(void)
 
     while (1)
     {
-    	if (API_intSensors_readTempCelsius(1000, &temperatureC) &&
-    			API_intSensors_readVoltMilliVolts(1000, &voltageMv)) {
+    	if (API_intSensors_readAllSensors(1000, &temperatureC, &voltageMv)) {
     		temperatureInt = (int32_t)temperatureC;
     		temperatureFrac = (uint32_t)((temperatureC - (float)temperatureInt) * 100.0f);
 
