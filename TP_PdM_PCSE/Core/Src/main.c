@@ -22,8 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "API_led.h"
-#include "API_delay.h"
+#include "API_intSensors.h"
 
 /* Private define ------------------------------------------------------------*/
 
@@ -42,49 +41,34 @@ bool_t uartInit();
   */
 int main(void)
 {
-	delay_t delay;
-	delayInit(&delay, 5000);
-
-	uint8_t i = 0;
-
-	led_t ledPlaquita;
-	API_LED_Init(&ledPlaquita, LD2_GPIO_Port, LD2_Pin);
-
 	HAL_Init();
 	SystemClock_Config();
 
-	uartInit();
+	if (!API_intSensors_init()) {
+		Error_Handler();
+	}
+
+	if (!uartInit()) {
+		Error_Handler();
+	}
+
+	float temperatureC;
+	int32_t temperatureInt;
+	uint32_t temperatureFrac;
+	uint32_t voltageMv;
 
     while (1)
     {
-    	if (delayRead(&delay)) {
-    		switch (i) {
-    		case 0:
-    			API_LED_SetMode(&ledPlaquita, FIX);
-    			API_LED_On(&ledPlaquita);
-    			printf("Led FIX\n");
-    			break;
-    		case 1:
-    			API_LED_SetMode(&ledPlaquita, BLINK);
-				API_LED_SetBlinkFreq(&ledPlaquita, 1);
-				printf("Led BLINK at 1Hz\n");
-				break;
-    		case 2:
-    			API_LED_SetMode(&ledPlaquita, BLINK);
-				API_LED_SetBlinkFreq(&ledPlaquita, 10);
-				printf("Led BLINK at 10Hz\n");
-				break;
-			default:
-				break;
-    		}
+    	if (API_intSensors_readAllSensors(1000, &temperatureC, &voltageMv)) {
+    		temperatureInt = (int32_t)temperatureC;
+    		temperatureFrac = (uint32_t)((temperatureC - (float)temperatureInt) * 100.0f);
 
-    		i++;
-    		if (i >= 3) {
-    			i=0;
-    		}
-		}
-
-		API_LED_Engine(&ledPlaquita);
+    		printf("MCU temp: %ld.%02lu C | VDDA: %lu mV\r\n",
+    				(long)temperatureInt,
+    				(unsigned long)temperatureFrac,
+					(unsigned long)voltageMv);
+    	}
+    	HAL_Delay(500);
     }
 
 }
