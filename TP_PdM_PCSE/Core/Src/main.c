@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "API_intSensors.h"
+#include "API_led.h"
 
 /* Private define ------------------------------------------------------------*/
 
@@ -56,14 +57,28 @@ int main(void)
 	int32_t temperatureInt;
 	uint32_t temperatureFrac;
 	uint32_t voltageMv;
+	led_t boardLed;
+	bool_t boardLedState;
+	const char *boardLedStateStr;
+	const char *boardLedModeStr;
+
+	API_LED_Init(&boardLed, LD2_GPIO_Port, LD2_Pin);
+	API_LED_SetMode(&boardLed, BLINK);
 
     while (1)
     {
+    	API_LED_Engine(&boardLed);
+    	boardLedState = API_LED_GetValue(&boardLed);
+    	boardLedStateStr = boardLedState ? "ON" : "OFF";
+    	boardLedModeStr = (API_LED_GetMode(&boardLed) == BLINK) ? "BLINK" : "FIX";
+
     	if (API_intSensors_readAllSensors(1000, &temperatureC, &voltageMv)) {
     		temperatureInt = (int32_t)temperatureC;
     		temperatureFrac = (uint32_t)((temperatureC - (float)temperatureInt) * 100.0f);
 
-    		printf("MCU temp: %ld.%02lu C | VDDA: %lu mV\r\n",
+    		printf("LED: %s (%s) | MCU temp: %ld.%02lu C | VDDA: %lu mV\r\n",
+    				boardLedStateStr,
+    				boardLedModeStr,
     				(long)temperatureInt,
     				(unsigned long)temperatureFrac,
 					(unsigned long)voltageMv);
