@@ -1,8 +1,11 @@
-/*
- * API_intSensors.c
+/**
+ * @file API_intSensors.c
+ * @brief Implementación de la API de alto nivel para sensores internos.
  *
- *  Created on: Apr 12, 2026
- *      Author: joaquin
+ * Este archivo implementa la capa de abstracción de aplicación para el acceso a
+ * los sensores internos del microcontrolador. La lógica de adquisición y
+ * conversión específica del hardware permanece encapsulada en el módulo
+ * `API_intSensors_port`.
  */
 
 #include "API_intSensors_port.h"
