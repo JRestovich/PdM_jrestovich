@@ -22,8 +22,9 @@
  * API de alto nivel, permitiendo funcionamiento fijo o intermitente.
  */
 typedef enum {
-	FIX = 0,  ///< Mantiene el LED en estado fijo.
-	BLINK     ///< Hace parpadear el LED segun el retardo configurado.
+	INVALID = 0 ///<  El led no esta en un estado invalido.
+	FIX ,  		///< Mantiene el LED en estado fijo.
+	BLINK       ///< Hace parpadear el LED segun el retardo configurado.
 } led_mode_e;
 
 /**
@@ -109,6 +110,18 @@ void API_LED_SetMode(led_t* led, led_mode_e mode);
  * @param freq Frecuencia de parpadeo deseada en Hertz.
  */
 void API_LED_SetBlinkFreq(led_t* led, uint32_t freq);
+
+/**
+ * @brief Obtiene el estado actual del LED.
+ *
+ * Consulta a la capa de port el estado fisico actual del LED asociado a la
+ * estructura de control.
+ *
+ * @param led Puntero a la estructura del LED a consultar.
+ *
+ * @return `true` si el LED se encuentra encendido, `false` en caso contrario.
+ */
+bool_t API_LED_GetValue(led_t* led);
 
 /**
  * @brief Obtiene el modo de funcionamiento actual del LED.

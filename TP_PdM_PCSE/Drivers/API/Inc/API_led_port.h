@@ -64,5 +64,17 @@ void API_LED_port_Off(led_port_t* led);
  */
 void API_LED_port_Toggle(led_port_t* led);
 
+/**
+ * @brief Obtiene el estado fisico actual del LED.
+ *
+ * Lee el nivel logico presente en el pin GPIO asociado al LED y lo devuelve
+ * como valor booleano.
+ *
+ * @param led Puntero al descriptor de hardware del LED a consultar.
+ *
+ * @return `true` si el LED se encuentra en nivel alto, `false` en caso
+ *         contrario.
+ */
+bool_t API_LED_port_GetValue(led_port_t* led);
 
 #endif /* API_INC_API_LED_PORT_H_ */

@@ -73,6 +73,14 @@ void API_LED_port_Toggle(led_port_t* led) {
 	HAL_GPIO_TogglePin(led->port, led->pin);
 }
 
+bool_t API_LED_port_GetValue(led_port_t* led) {
+	if (led == NULL || led->port == NULL) {
+		return false;
+	}
+
+	return HAL_GPIO_ReadPin(led->port, led->pin) == GPIO_PIN_SET;
+}
+
 /********************************************************/
 /* Implementacion de Funciones Privadas                 */
 /********************************************************/
