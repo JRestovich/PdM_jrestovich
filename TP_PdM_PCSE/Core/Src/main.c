@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "API_boardTemp_port.h"
+#include "API_intSensors_port.h"
 
 /* Private define ------------------------------------------------------------*/
 
@@ -44,7 +44,7 @@ int main(void)
 	HAL_Init();
 	SystemClock_Config();
 
-	if (!API_boardTemp_port_init()) {
+	if (!API_intSensors_port_init()) {
 		Error_Handler();
 	}
 
@@ -55,16 +55,19 @@ int main(void)
 	float temperatureC;
 	int32_t temperatureInt;
 	uint32_t temperatureFrac;
+	uint32_t voltageMv;
 
     while (1)
     {
-    	if (API_boardTemp_port_readCelsius(1000, &temperatureC)) {
+    	if (API_intSensors_port_readTempCelsius(1000, &temperatureC) &&
+    			API_intSensors_port_readVoltMilliVolts(1000, &voltageMv)) {
     		temperatureInt = (int32_t)temperatureC;
     		temperatureFrac = (uint32_t)((temperatureC - (float)temperatureInt) * 100.0f);
 
-    		printf("MCU temp: %ld.%02lu C\r\n",
+    		printf("MCU temp: %ld.%02lu C | VDDA: %lu mV\r\n",
     				(long)temperatureInt,
-    				(unsigned long)temperatureFrac);
+    				(unsigned long)temperatureFrac,
+					(unsigned long)voltageMv);
     	}
     	HAL_Delay(500);
     }
