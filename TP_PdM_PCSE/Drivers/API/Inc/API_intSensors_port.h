@@ -5,8 +5,8 @@
  *      Author: joaquin
  */
 
-#ifndef API_INC_API_INTSENSORS_PORT_H_
-#define API_INC_API_INTSENSORS_PORT_H_
+#ifndef API_INTSENSORS_PORT_H_
+#define API_INTSENSORS_PORT_H_
 
 #include "stm32f4xx_hal.h"
 
@@ -21,4 +21,4 @@ bool_t API_intSensors_port_readTempCelsius(uint32_t timeout, float *temperatureC
 bool_t API_intSensors_port_readVoltRaw(uint32_t timeout, uint32_t *value);
 bool_t API_intSensors_port_readVoltMilliVolts(uint32_t timeout, uint32_t *voltageMv);
 
-#endif /* API_INC_API_INTSENSORS_PORT_H_ */
+#endif /* API_INTSENSORS_PORT_H_ */
