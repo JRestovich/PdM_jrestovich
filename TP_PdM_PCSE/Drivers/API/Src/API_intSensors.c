@@ -7,8 +7,15 @@
  * conversión específica del hardware permanece encapsulada en el módulo
  * `API_intSensors_port`.
  */
+/********************************************************/
+/* Includes                                             */
+/********************************************************/
 
 #include "API_intSensors_port.h"
+
+/********************************************************/
+/* Implementacion de Funciones Publicas                 */
+/********************************************************/
 
 bool_t API_intSensors_init(void) {
 	return API_intSensors_port_init();

@@ -9,16 +9,32 @@
  * documentan únicamente los elementos privados del módulo.
  */
 
+/********************************************************/
+/* Includes                                             */
+/********************************************************/
+
 #include "API_intSensors_port.h"
 #include "stm32f4xx_ll_adc.h"
 
+/********************************************************/
+/* Defines                                              */
+/********************************************************/
+
 #define SLOPE 0.4   ///< Pendiente utilizada para convertir la lectura del sensor de temperatura a grados Celsius.
 #define PEND -279   ///< Ordenada al origen utilizada para convertir la lectura del sensor de temperatura a grados Celsius.
+
+/********************************************************/
+/* Variables Privadas                                   */
+/********************************************************/
 
 static bool_t initOk = false;                  ///< Indica si el módulo de port fue inicializado correctamente.
 static ADC_HandleTypeDef hadc;                 ///< Handler HAL asociado al periférico ADC utilizado por el módulo.
 static ADC_ChannelConfTypeDef tempChConfig;    ///< Configuración del canal ADC correspondiente al sensor de temperatura interno.
 static ADC_ChannelConfTypeDef voltChConfig;    ///< Configuración del canal ADC correspondiente a la referencia interna de tensión.
+
+/********************************************************/
+/* Declaracion de Funciones Privadas                    */
+/********************************************************/
 
 /**
  * @brief Configura los parámetros generales del periférico ADC.
@@ -95,6 +111,10 @@ static float rawToCelsius(uint32_t rawValue);
  * @return Tensión equivalente expresada en milivoltios.
  */
 static uint32_t rawToMilliVolts(uint32_t rawValue);
+
+/********************************************************/
+/* Implementacion de Funciones Publicas                 */
+/********************************************************/
 
 bool_t API_intSensors_port_init(void) {
 	__HAL_RCC_ADC1_CLK_ENABLE();
@@ -193,6 +213,10 @@ bool_t API_intSensors_port_readAllSensors(uint32_t timeout, float* temperatureC,
 	*voltageMv = rawToMilliVolts(rawValueV);
 	return true;
 }
+
+/********************************************************/
+/* Implementacion de Funciones Privadas                 */
+/********************************************************/
 
 static bool_t handlerConfig(void) {
 	hadc.Instance = ADC1;
