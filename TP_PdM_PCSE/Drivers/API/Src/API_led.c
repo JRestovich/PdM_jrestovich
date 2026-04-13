@@ -97,3 +97,10 @@ void API_LED_SetBlinkFreq(led_t* led, uint32_t freq) {
 
 	delayWrite(&led->delay, halfPeriodMs);
 }
+
+led_mode_e API_LED_GetMode(led_t* led) {
+	if (led == NULL) {
+		return;
+	}
+	return led->mode;
+}

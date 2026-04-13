@@ -110,4 +110,16 @@ void API_LED_SetMode(led_t* led, led_mode_e mode);
  */
 void API_LED_SetBlinkFreq(led_t* led, uint32_t freq);
 
+/**
+ * @brief Obtiene el modo de funcionamiento actual del LED.
+ *
+ * Devuelve el modo logico actualmente configurado para el LED en la capa de
+ * control de alto nivel.
+ *
+ * @param led Puntero a la estructura del LED a consultar.
+ *
+ * @return Modo de funcionamiento actual del LED.
+ */
+led_mode_e API_LED_GetMode(led_t* led);
+
 #endif /* API_INC_API_LED_H_ */
