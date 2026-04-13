@@ -6,6 +6,10 @@
  */
 
 #include "API_boardTemp_port.h"
+#include "stm32f4xx_ll_adc.h"
+
+#define SLOPE 0.4
+#define PEND -279
 
 static bool_t initOk = false;
 static ADC_HandleTypeDef hadc;
@@ -13,6 +17,7 @@ static ADC_ChannelConfTypeDef chConfig;
 
 static bool_t handlerConfig(void);
 static void channelConfig(void);
+static float rawToCelsius(uint32_t rawValue);
 
 bool_t API_boardTemp_port_init(void) {
 
@@ -47,6 +52,38 @@ bool_t API_boardTemp_port_convertionReady(uint32_t timeout) {
 	return HAL_ADC_PollForConversion(&hadc, timeout) == HAL_OK;
 }
 
+bool_t API_boardTemp_port_readRaw(uint32_t timeout, uint32_t *value) {
+	if (value == NULL || !initOk) {
+		return false;
+	}
+
+	if (HAL_ADC_Start(&hadc) != HAL_OK) {
+		return false;
+	}
+
+	if (HAL_ADC_PollForConversion(&hadc, timeout) != HAL_OK) {
+		return false;
+	}
+
+	*value = HAL_ADC_GetValue(&hadc);
+	return true;
+}
+
+bool_t API_boardTemp_port_readCelsius(uint32_t timeout, float *temperatureC) {
+	uint32_t rawValue;
+
+	if (temperatureC == NULL) {
+		return false;
+	}
+
+	if (!API_boardTemp_port_readRaw(timeout, &rawValue)) {
+		return false;
+	}
+
+	*temperatureC = rawToCelsius(rawValue);
+	return true;
+}
+
 /******************************************/
 static bool_t handlerConfig(void) {
 	hadc.Instance = ADC1;
@@ -72,4 +109,9 @@ static void channelConfig(void) {
 	chConfig.Rank = 1U;
 	chConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
 	chConfig.Offset = 0U;
+}
+
+static float rawToCelsius(uint32_t rawValue) {
+	float mVread = (float)(HAL_ADC_GetValue(&hadc)) / 4095 * 3300;
+	return mVread * SLOPE + PEND;
 }
