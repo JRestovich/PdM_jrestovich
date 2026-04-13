@@ -19,18 +19,19 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 
-#include "API_led.h"
-#include "API_delay.h"
+#include "API_intSensors.h"
 
 /* Private define ------------------------------------------------------------*/
-#define DEBOUNCE_MS 30U
 
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart2;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+bool_t uartInit();
 
 /* Private user code ---------------------------------------------------------*/
 
@@ -40,44 +41,34 @@ void SystemClock_Config(void);
   */
 int main(void)
 {
-	delay_t delay;
-	delayInit(&delay, 5000);
-
-	uint8_t i = 0;
-
-	led_t ledPlaquita;
-	API_LED_Init(&ledPlaquita, LD2_GPIO_Port, LD2_Pin);
-
 	HAL_Init();
 	SystemClock_Config();
 
+	if (!API_intSensors_init()) {
+		Error_Handler();
+	}
+
+	if (!uartInit()) {
+		Error_Handler();
+	}
+
+	float temperatureC;
+	int32_t temperatureInt;
+	uint32_t temperatureFrac;
+	uint32_t voltageMv;
+
     while (1)
     {
-    	if (delayRead(&delay)) {
-    		switch (i) {
-    		case 0:
-    			API_LED_SetMode(&ledPlaquita, FIX);
-    			API_LED_On(&ledPlaquita);
-    			break;
-    		case 1:
-    			API_LED_SetMode(&ledPlaquita, BLINK);
-				API_LED_SetBlinkFreq(&ledPlaquita, 1);
-				break;
-    		case 2:
-    			API_LED_SetMode(&ledPlaquita, BLINK);
-				API_LED_SetBlinkFreq(&ledPlaquita, 10);
-				break;
-			default:
-				break;
-    		}
+    	if (API_intSensors_readAllSensors(1000, &temperatureC, &voltageMv)) {
+    		temperatureInt = (int32_t)temperatureC;
+    		temperatureFrac = (uint32_t)((temperatureC - (float)temperatureInt) * 100.0f);
 
-    		i++;
-    		if (i >= 3) {
-    			i=0;
-    		}
-		}
-
-		API_LED_Engine(&ledPlaquita);
+    		printf("MCU temp: %ld.%02lu C | VDDA: %lu mV\r\n",
+    				(long)temperatureInt,
+    				(unsigned long)temperatureFrac,
+					(unsigned long)voltageMv);
+    	}
+    	HAL_Delay(500);
     }
 
 }
@@ -127,6 +118,45 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+
+bool_t uartInit()
+{
+	huart2.Instance = USART2;
+	huart2.Init.BaudRate = 115200;
+	huart2.Init.WordLength = UART_WORDLENGTH_8B;
+	huart2.Init.StopBits = UART_STOPBITS_1;
+	huart2.Init.Parity = UART_PARITY_NONE;
+	huart2.Init.Mode = UART_MODE_TX_RX;
+	huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+
+	if (HAL_UART_Init(&huart2) != HAL_OK) {
+		return false;
+	} else {
+		char buffer[200];
+		sprintf(buffer,
+		        "UART Configurated:\r\n"
+		        "\tBaudRate: %lu\r\n"
+		        "\tWordLength: %lu\r\n"
+		        "\tStopBits: %lu\r\n"
+		        "\tParity: %lu\r\n",
+		        huart2.Init.BaudRate,
+		        huart2.Init.WordLength,
+		        huart2.Init.StopBits,
+		        huart2.Init.Parity);
+
+//		uartSendStringSize((uint8_t*)buffer, strlen(buffer));
+		HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
+	    return true;
+	}
+}
+
+int _write(int file, char *ptr, int len)
+{
+    HAL_UART_Transmit(&huart2, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+    return len;
 }
 
 /**

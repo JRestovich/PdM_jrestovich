@@ -7,9 +7,21 @@
  * del parpadeo.
  */
 
+/********************************************************/
+/* Includes                                             */
+/********************************************************/
+
 #include "API_led.h"
 
+/********************************************************/
+/* Defines                                              */
+/********************************************************/
+
 #define FREQ_1Hz 1
+
+/********************************************************/
+/* Declaracion de Funciones Privadas                    */
+/********************************************************/
 
 /**
  * @brief Habilita los clocks de los puertos GPIO utilizados por el modulo.
@@ -17,7 +29,11 @@
  * Activa los relojes de los puertos GPIO necesarios para poder configurar y
  * operar los LEDs.
  */
-void _initPortClock(void);
+static void _initPortClock(void);
+
+/********************************************************/
+/* Implementacion de Funciones Publicas                 */
+/********************************************************/
 
 void API_LED_Init(led_t* led, GPIO_TypeDef *port, uint16_t pin) {
 	if (led == NULL) {
@@ -107,7 +123,11 @@ void API_LED_SetBlinkFreq(led_t* led, uint32_t freq) {
 	delayWrite(&led->delay, halfPeriodMs);
 }
 
-void _initPortClock(void) {
+/********************************************************/
+/* Implementacion de Funciones Privadas                 */
+/********************************************************/
+
+static void _initPortClock(void) {
 	  /* GPIO Ports Clock Enable */
 	  __HAL_RCC_GPIOC_CLK_ENABLE();
 	  __HAL_RCC_GPIOH_CLK_ENABLE();
