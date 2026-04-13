@@ -22,7 +22,7 @@
  * API de alto nivel, permitiendo funcionamiento fijo o intermitente.
  */
 typedef enum {
-	INVALID = 0 ///<  El led no esta en un estado invalido.
+	INVALID = 0, ///<  El led no esta en un estado invalido.
 	FIX ,  		///< Mantiene el LED en estado fijo.
 	BLINK       ///< Hace parpadear el LED segun el retardo configurado.
 } led_mode_e;
