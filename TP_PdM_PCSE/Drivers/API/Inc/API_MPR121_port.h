@@ -15,5 +15,6 @@
 typedef bool bool_t;
 
 bool_t API_MPR121_port_init();
+bool_t API_MPR121_port_readKeys(uint16_t *pdata);
 
 #endif /* API_INC_API_MPR121_PORT_H_ */

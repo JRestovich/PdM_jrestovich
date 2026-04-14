@@ -27,6 +27,38 @@ bool_t API_MPR121_port_init() {
 	return true;
 }
 
+bool_t API_MPR121_port_readKeys(uint16_t *keys) {
+	uint8_t reg = 0x00;       // registro inicial (Touch Status LSB)
+	uint8_t data[2] = {0};
+
+	if (keys == NULL) {
+		return false;
+	}
+
+	// =========================================================
+	// Leer 2 bytes desde 0x00 (auto-increment → 0x00 y 0x01)
+	// =========================================================
+	if (HAL_I2C_Master_Transmit(&hi2c, MPR121_ADDR, &reg, 1, 1000) != HAL_OK) {
+		return false;
+	}
+
+	if (HAL_I2C_Master_Receive(&hi2c, MPR121_ADDR, data, 2, 1000) != HAL_OK) {
+		return false;
+	}
+
+	// =========================================================
+	// Combinar bytes:
+	// data[0] → ELE0–ELE7
+	// data[1] → ELE8–ELE11 (+ flags)
+	// =========================================================
+	*keys = ((uint16_t)data[1] << 8) | data[0];
+
+	// Solo nos interesan 12 bits (ELE0–ELE11)
+	*keys &= 0x0FFF;
+
+	return true;
+}
+
 static bool_t initHw() {
     ///< 1. Configuración básica del periférico I2C
 
