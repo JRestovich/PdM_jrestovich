@@ -12,11 +12,13 @@
 static I2C_HandleTypeDef hi2c;
 static bool_t initOk = false;
 
-static bool_t initHw();
+static void initI2cPinsHw();
+static bool_t initI2cHw();
 static bool_t initModule();
 
 bool_t API_MPR121_port_init() {
-	if (!initHw()) {
+	initI2cPinsHw();
+	if (!initI2cHw()) {
 		return false;
 	}
 	if (!initModule()) {
@@ -59,7 +61,9 @@ bool_t API_MPR121_port_readKeys(uint16_t *keys) {
 	return true;
 }
 
-static bool_t initHw() {
+static bool_t initI2cHw() {
+    __HAL_RCC_I2C1_CLK_ENABLE();
+
     ///< 1. Configuración básica del periférico I2C
 
     hi2c.Instance = I2C1;   // Usamos I2C1 (ajustar según hardware)
@@ -89,6 +93,20 @@ static bool_t initHw() {
 
     ///< I2C listo para usar con el MPR121
     return true;
+}
+
+static void initI2cPinsHw() {
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+
+    /* I2C1 en Nucleo-F446RE: PB8 = SCL, PB9 = SDA */
+    GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
 
 static bool_t initModule() {
@@ -199,4 +217,3 @@ static bool_t initModule() {
 
 	    return true;
 }
-
