@@ -22,10 +22,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "API_intSensors.h"
-#include "API_led.h"
+#include "API_lcd.h"
 
 /* Private define ------------------------------------------------------------*/
+#include <stdbool.h>
+typedef bool bool_t;
 
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart2;
@@ -42,48 +43,35 @@ bool_t uartInit();
   */
 int main(void)
 {
+	uint8_t lcdPortValue = 0;
+
 	HAL_Init();
 	SystemClock_Config();
-
-	if (!API_intSensors_init()) {
-		Error_Handler();
-	}
 
 	if (!uartInit()) {
 		Error_Handler();
 	}
 
-	float temperatureC;
-	int32_t temperatureInt;
-	uint32_t temperatureFrac;
-	uint32_t voltageMv;
-	led_t boardLed;
-	bool_t boardLedState;
-	const char *boardLedStateStr;
-	const char *boardLedModeStr;
+	if (Init_Lcd() != LCD_OK) {
+		printf("Error al inicializar el LCD\r\n");
+		Error_Handler();
+	}
 
-	API_LED_Init(&boardLed, LD2_GPIO_Port, LD2_Pin);
-	API_LED_SetMode(&boardLed, BLINK);
+	if (LCD_EstaVivo(&lcdPortValue) == LCD_OK) {
+		printf("LCD vivo, puerto PCF8574 = 0x%02X\r\n", lcdPortValue);
+	} else {
+		printf("LCD no responde en lectura\r\n");
+	}
+
+	ClrLcd();
+	PosCaracHLcd(0);
+	SacaTextoLcd((uint8_t *)"Hola");
+	PosCaracLLcd(0);
+	SacaTextoLcd((uint8_t *)"LCD OK");
 
     while (1)
     {
-    	API_LED_Engine(&boardLed);
-    	boardLedState = API_LED_GetValue(&boardLed);
-    	boardLedStateStr = boardLedState ? "ON" : "OFF";
-    	boardLedModeStr = (API_LED_GetMode(&boardLed) == BLINK) ? "BLINK" : "FIX";
-
-    	if (API_intSensors_readAllSensors(1000, &temperatureC, &voltageMv)) {
-    		temperatureInt = (int32_t)temperatureC;
-    		temperatureFrac = (uint32_t)((temperatureC - (float)temperatureInt) * 100.0f);
-
-    		printf("LED: %s (%s) | MCU temp: %ld.%02lu C | VDDA: %lu mV\r\n",
-    				boardLedStateStr,
-    				boardLedModeStr,
-    				(long)temperatureInt,
-    				(unsigned long)temperatureFrac,
-					(unsigned long)voltageMv);
-    	}
-    	HAL_Delay(500);
+    	HAL_Delay(1000);
     }
 
 }
