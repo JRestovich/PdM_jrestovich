@@ -1,17 +1,16 @@
-/// @file API_lcd_port.c
-/// @version 1.0
-/// @date 23/4/2023
-/// @author Ing. Pavelek Israel
-/// @title API de manejo del LCD de bajo nivel
-/// @brief funciones lcd_port.c de bajo nivel
-
+/*
+ * API_lcd_port.h
+ *
+ *  Created on: Apr 17, 2026
+ *      Author: joaquin
+ */
 
 
 #include"API_Lcd_port.h"
 
 static I2C_HandleTypeDef hi2c1;
-static _Bool LCD_I2C_DeviceReady(void);
-static _Bool LCD_I2C_Read_Port(uint8_t *port_value);
+static bool_t LCD_I2C_DeviceReady(void);
+static bool_t LCD_I2C_Read_Port(uint8_t *port_value);
 
 /**
   * @brief  GPIO_I2C configura los GPIO y clocks del I2C usado por el LCD.
@@ -28,9 +27,7 @@ void GPIO_I2C(I2C_HandleTypeDef *hi2c)
 
 	if (hi2c->Instance == I2C1) {
 		__HAL_RCC_GPIOB_CLK_ENABLE();
-
-		GPIO_InitStruct.Pin = GPIO_PIN_6 | GPIO_PIN_9;
-//		GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9;
+		GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9;
 		GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
 		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -41,12 +38,8 @@ void GPIO_I2C(I2C_HandleTypeDef *hi2c)
 	}
 }
 
-/**
-  * @brief  LCD_HW_init inicializa la interfaz I2C de bajo nivel del LCD.
-  * @param  void
-  * @return LCD_OK si la inicializacion fue correcta, LCD_ERROR en caso contrario
-*/
-_Bool LCD_HW_init(void)
+
+bool_t LCD_HW_init(void)
 {
 	hi2c1.Instance = I2C1;
 	hi2c1.Init.ClockSpeed = 100000;
@@ -76,15 +69,7 @@ _Bool LCD_HW_init(void)
 	return LCD_OK;
 }
 
-/**
-  * @brief  Verifica si el adaptador I2C del LCD responde con ACK.
-  * @param  void
-  * @return LCD_OK si el dispositivo responde, LCD_ERROR en caso contrario
-  *
-  * Nota: el backpack I2C del LCD no expone registros direccionables como una
-  * memoria; por eso se usa una verificacion de presencia del esclavo.
-*/
-static _Bool LCD_I2C_DeviceReady(void)
+static bool_t LCD_I2C_DeviceReady(void)
 {
 	if (HAL_I2C_IsDeviceReady(&hi2c1, LCD_DIR << 1, 3, HAL_MAX_DELAY) != HAL_OK) {
 		return LCD_ERROR;
@@ -93,15 +78,7 @@ static _Bool LCD_I2C_DeviceReady(void)
 	return LCD_OK;
 }
 
-/**
-  * @brief  Lee el byte del puerto del PCF8574 en modo READ.
-  * @param  port_value puntero donde se guarda el valor leido
-  * @return LCD_OK si la lectura fue correcta, LCD_ERROR en caso contrario
-  *
-  * El PCF8574 no tiene registros internos direccionables; la lectura devuelve
-  * el estado actual de sus 8 lineas de puerto.
-*/
-static _Bool LCD_I2C_Read_Port(uint8_t *port_value)
+static bool_t LCD_I2C_Read_Port(uint8_t *port_value)
 {
 	if (port_value == NULL) {
 		return LCD_ERROR;
@@ -114,22 +91,10 @@ static _Bool LCD_I2C_Read_Port(uint8_t *port_value)
 	return LCD_OK;
 }
 
-_Bool LCD_Read_Port(uint8_t *port_value)
+bool_t LCD_Read_Port(uint8_t *port_value)
 {
 	return LCD_I2C_Read_Port(port_value);
 }
-
-
-/**
-  * @brief  LCD_Write_Byte Funciòn que saca el byte a escribir al LCD por I2C, en caso de trabajar de forma paralela reemplazar por
- * 			GPIO. Si hay un error queda el LED2 encendido y el micro en error
-  * @param  uint8_t valor a sacar por el puerto
-  * @return void
-  * @author Ing. Pavelek Israel
-  * @version 1.0
-  * @date 16/4/2023
-*/
-
 
 void LCD_Write_Byte(uint8_t valor){
 	if(HAL_I2C_Master_Transmit (&hi2c1, LCD_DIR<<1, &valor, sizeof(valor),HAL_MAX_DELAY) != HAL_OK)
