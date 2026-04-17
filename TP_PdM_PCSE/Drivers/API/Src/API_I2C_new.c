@@ -17,15 +17,15 @@
 #define DEFAULT_SDA_I2C3 GPIO_PIN_4 // B
 #define DEFAULT_SCL_I2C3 GPIO_PIN_8 // A
 
-static bool_t initDefaultHi2c(I2C_HandleTypeDef *hi2c, I2C_TypeDef *i2cInstance);
+static bool_t initDefaultHi2c(I2C_Device_t* device, I2C_TypeDef *i2cInstance);
 static bool_t initDefaultHw(I2C_TypeDef *i2cInstance);
-static bool_t i2cDeviceReady(I2C_HandleTypeDef *hi2c, uint16_t address);
+static bool_t i2cDeviceReady(I2C_Device_t* device, uint16_t address);
 
-bool_t API_I2C_DefaultConfig(I2C_HandleTypeDef *hi2c, I2C_TypeDef *i2cInstance) {
-	if (hi2c == NULL) {
+bool_t API_I2C_DefaultConfig(I2C_Device_t* device, I2C_TypeDef *i2cInstance) {
+	if (device == NULL) {
 		return false;
 	}
-	if (!initDefaultHi2c(hi2c, i2cInstance) || !initDefaultHw(i2cInstance)) {
+	if (!initDefaultHi2c(device, i2cInstance) || !initDefaultHw(i2cInstance)) {
 		return false;
 	}
 
@@ -33,50 +33,56 @@ bool_t API_I2C_DefaultConfig(I2C_HandleTypeDef *hi2c, I2C_TypeDef *i2cInstance) 
 }
 
 // TODO agregar enum de errores
-bool_t API_I2C_Init(I2C_HandleTypeDef *hi2c, uint16_t address) {
-	if (hi2c == NULL) {
+bool_t API_I2C_Init(I2C_Device_t* device, uint16_t address) {
+	if (device == NULL) {
 		return false;
 	}
-	if (HAL_I2C_Init(hi2c) != HAL_OK) {
+	if (HAL_I2C_Init(&device->hi2c) != HAL_OK) {
 		return false;
 	}
 
-	if (!i2cDeviceReady(hi2c, address)) {
+	if (!i2cDeviceReady(device, address)) {
 		return false;
 	}
+
+	device->deviceAddress = address;
 
 	return true;
 }
 
-bool_t API_I2C_Tx(I2C_HandleTypeDef *hi2c, uint16_t address, uint8_t *value, uint16_t size) {
-	if (hi2c == NULL || value == NULL || size == 0U) {
+bool_t API_I2C_Tx(I2C_Device_t* device, uint16_t address, uint8_t *value, uint16_t size) {
+	if (device == NULL || value == NULL || size == 0U) {
 		return false;
 	}
-	return HAL_I2C_Master_Transmit(hi2c, address << 1, value, size, HAL_MAX_DELAY) == HAL_OK;
+	return HAL_I2C_Master_Transmit(&device->hi2c, address << 1, value, size, HAL_MAX_DELAY) == HAL_OK;
 }
 
-bool_t API_I2C_Rx(I2C_HandleTypeDef *hi2c, uint16_t address, uint8_t* value) {
-	if (hi2c == NULL || value == NULL) {
+bool_t API_I2C_Rx(I2C_Device_t* device, uint16_t address, uint8_t* value) {
+	if (device == NULL || value == NULL) {
 		return false;
 	}
-	return HAL_I2C_Master_Receive(hi2c, address << 1, value, 1, HAL_MAX_DELAY) == HAL_OK;
+	return HAL_I2C_Master_Receive(&device->hi2c, address << 1, value, 1, HAL_MAX_DELAY) == HAL_OK;
+}
+
+void API_I2C_SetAddress(I2C_Device_t * device, uint16_t address) {
+	device->deviceAddress = address;
 }
 
 /***********************************/
-static bool_t initDefaultHi2c(I2C_HandleTypeDef *hi2c, I2C_TypeDef *i2cInstance) {
-	if (i2cInstance == NULL) {
+static bool_t initDefaultHi2c(I2C_Device_t* device, I2C_TypeDef *i2cInstance) {
+	if (device == NULL) {
 		return false;
 	}
 
-	hi2c->Instance = i2cInstance;
-	hi2c->Init.ClockSpeed = DEFAULT_CLK_SPEED;
-	hi2c->Init.DutyCycle = I2C_DUTYCYCLE_2;
-	hi2c->Init.OwnAddress1 = 0;
-	hi2c->Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-	hi2c->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-	hi2c->Init.OwnAddress2 = 0;
-	hi2c->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-	hi2c->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+	device->hi2c.Instance = i2cInstance;
+	device->hi2c.Init.ClockSpeed = DEFAULT_CLK_SPEED;
+	device->hi2c.Init.DutyCycle = I2C_DUTYCYCLE_2;
+	device->hi2c.Init.OwnAddress1 = 0;
+	device->hi2c.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+	device->hi2c.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+	device->hi2c.Init.OwnAddress2 = 0;
+	device->hi2c.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+	device->hi2c.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
 
 	return true;
 }
@@ -118,6 +124,6 @@ static bool_t initDefaultHw(I2C_TypeDef *i2cInstance) {
 	return true;
 }
 
-static bool_t i2cDeviceReady(I2C_HandleTypeDef *hi2c, uint16_t address) {
-	return HAL_I2C_IsDeviceReady(hi2c, address << 1, 3, HAL_MAX_DELAY) == HAL_OK;
+static bool_t i2cDeviceReady(I2C_Device_t* device, uint16_t address) {
+	return HAL_I2C_IsDeviceReady(&device->hi2c, address << 1, 3, HAL_MAX_DELAY) == HAL_OK;
 }
