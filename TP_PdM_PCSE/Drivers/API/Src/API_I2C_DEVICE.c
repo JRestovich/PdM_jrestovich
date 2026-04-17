@@ -5,7 +5,7 @@
  *      Author: joaquin
  */
 
-#include "API_I2C_new.h"
+#include <API_I2C_DEVICE.h>
 
 #define DEFAULT_CLK_SPEED 100000
 #define DEFAULT_SDA_I2C1 GPIO_PIN_9 // B
