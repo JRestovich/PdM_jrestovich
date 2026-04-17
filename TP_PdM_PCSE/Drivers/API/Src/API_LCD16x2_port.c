@@ -6,22 +6,42 @@
  */
 #include "API_LCD16x2_port.h"
 
-#define ROW_QTY 2
-#define LCD_DIR 0x27
-#define I2C_INSTANCE I2C1
 
-I2C_HandleTypeDef hi2c;
-
-bool_t API_LCD16x2_Init(uint16_t address) {
-	if (!API_I2C_DefaultConfig(&hi2c, I2C_INSTANCE)) {
+bool_t API_LCD16x2_port_Init(LCD16x2_port* port, uint16_t address, I2C_TypeDef* i2cInstance) {
+	if (port == NULL) {
 		return false;
 	}
-	if (!API_I2C_Init(&hi2c, LCD_DIR)) {
+	port->address = address;
+	if (!API_I2C_DefaultConfig(&port->hi2c, i2cInstance)) {
+		return false;
+	}
+	if (!API_I2C_Init(&port->hi2c, port->address)) {
 		return false;
 	}
 	return true;
 }
 
-bool_t API_LCD16x2_Write_Byte(uint8_t valor) {
-	return API_I2C_Tx(&hi2c, LCD_DIR, &valor);
+bool_t API_LCD16x2_port_Write_Byte(LCD16x2_port* port, uint8_t valor) {
+	if (port == NULL) {
+		return false;
+	}
+	return API_I2C_Tx(&port->hi2c, port->address, &valor, sizeof(valor));
+}
+
+bool_t API_LCD16x2_port_Read_Byte(LCD16x2_port *port, uint8_t *value) {
+	if (port == NULL || value == NULL) {
+		return false;
+	}
+
+	return API_I2C_Rx(&port->hi2c, port->address, value);
+}
+
+bool_t API_LCD16x2_port_Is_Alive(LCD16x2_port *port) {
+	uint8_t value;
+
+	if (port == NULL) {
+		return false;
+	}
+
+	return API_LCD16x2_port_Read_Byte(port, &value);
 }
