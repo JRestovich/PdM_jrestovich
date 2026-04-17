@@ -8,14 +8,14 @@
 
 
 #include "API_lcd.h"
-#include "API_Lcd_port.h"
+#include "API_LCD16x2_port.h"
 #include "API_delay.h"
-#include "API_I2C.h"
 
 static void DelayLcd(uint32_t demora);
 static void ControlLcd(uint8_t valor);
 static void Envia8bitsLcd (uint8_t valor,_Bool tipo);
 static void Envia4bitsLcd (uint8_t valor,_Bool tipo);
+static I2C_Device_t lcdPort;
 
 /* Inicializacion anterior:
 static const uint8_t LCD_INIT_CMD[]={ _4BIT_MODE,
@@ -50,10 +50,10 @@ static const uint8_t LCD_INIT_CMD[]={ _4BIT_MODE,
 
 
 _Bool Init_Lcd(void){
-
-   if (LCD_HW_init() == LCD_ERROR) {
-	   return LCD_ERROR;
-   }
+	
+	   if (!API_LCD16x2_port_Init(&lcdPort, LCD_DIR, I2C1)) {
+		   return LCD_ERROR;
+	   }
    DelayLcd(DELAY20ms);
    Envia4bitsLcd(COMANDO_INI1,CONTROL);
    DelayLcd(DELAY10ms);
@@ -70,7 +70,7 @@ _Bool Init_Lcd(void){
 }
 
 _Bool LCD_EstaVivo(uint8_t *port_value){
-	return LCD_Read_Port(port_value);
+	return API_LCD16x2_port_Read_Byte(&lcdPort, port_value);
 }
 
 /**
@@ -170,11 +170,11 @@ void Envia8bitsLcd (uint8_t valor,_Bool tipo){
 */
 
 static void Envia4bitsLcd (uint8_t valor,_Bool tipo){
-
-	LCD_Write_Byte(valor+tipo+EN+BL);
-	DelayLcd(DelayTime);
-	LCD_Write_Byte(valor+tipo+BL);
-	DelayLcd(DelayTime);
+	
+		API_LCD16x2_port_Write_Byte(&lcdPort, valor+tipo+EN+BL);
+		DelayLcd(DelayTime);
+		API_LCD16x2_port_Write_Byte(&lcdPort, valor+tipo+BL);
+		DelayLcd(DelayTime);
 }
 
 /**
