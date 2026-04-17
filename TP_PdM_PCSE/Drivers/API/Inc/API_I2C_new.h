@@ -15,7 +15,7 @@
 
 bool_t API_I2C_DefaultConfig(I2C_HandleTypeDef *hi2c, I2C_TypeDef* i2cInstance);
 bool_t API_I2C_Init(I2C_HandleTypeDef *hi2c, uint16_t address);
-bool_t API_I2C_Tx(I2C_HandleTypeDef *hi2c, uint16_t address, uint8_t* value);
+bool_t API_I2C_Tx(I2C_HandleTypeDef *hi2c, uint16_t address, uint8_t *value, uint16_t size);
 bool_t API_I2C_Rx(I2C_HandleTypeDef *hi2c, uint16_t address, uint8_t* value);
 
 //HAL_StatusTypeDef HAL_I2C_Master_Transmit(I2C_HandleTypeDef *hi2c,

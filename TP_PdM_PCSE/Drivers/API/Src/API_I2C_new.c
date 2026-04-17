@@ -48,11 +48,11 @@ bool_t API_I2C_Init(I2C_HandleTypeDef *hi2c, uint16_t address) {
 	return true;
 }
 
-bool_t API_I2C_Tx(I2C_HandleTypeDef *hi2c, uint16_t address, uint8_t* value) {
-	if (hi2c == NULL || value == NULL) {
+bool_t API_I2C_Tx(I2C_HandleTypeDef *hi2c, uint16_t address, uint8_t *value, uint16_t size) {
+	if (hi2c == NULL || value == NULL || size == 0U) {
 		return false;
 	}
-	return HAL_I2C_Master_Transmit (hi2c, address<<1, value, sizeof(value),HAL_MAX_DELAY) == HAL_OK;
+	return HAL_I2C_Master_Transmit(hi2c, address << 1, value, size, HAL_MAX_DELAY) == HAL_OK;
 }
 
 bool_t API_I2C_Rx(I2C_HandleTypeDef *hi2c, uint16_t address, uint8_t* value) {
@@ -121,4 +121,3 @@ static bool_t initDefaultHw(I2C_TypeDef *i2cInstance) {
 static bool_t i2cDeviceReady(I2C_HandleTypeDef *hi2c, uint16_t address) {
 	return HAL_I2C_IsDeviceReady(hi2c, address << 1, 3, HAL_MAX_DELAY) == HAL_OK;
 }
-
