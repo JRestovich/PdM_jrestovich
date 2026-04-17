@@ -50,7 +50,7 @@ bool_t API_I2C_DEVICE_Init(I2C_Device_t* device, uint16_t address) {
 	return true;
 }
 
-bool_t API_I2C_DEVICEDEVICETx(I2C_Device_t* device, uint16_t address, uint8_t *value, uint16_t size) {
+bool_t API_I2C_DEVICE_Tx(I2C_Device_t* device, uint16_t address, uint8_t *value, uint16_t size) {
 	if (device == NULL || value == NULL || size == 0U) {
 		return false;
 	}
@@ -64,8 +64,204 @@ bool_t API_I2C_DEVICE_Rx(I2C_Device_t* device, uint16_t address, uint8_t* value)
 	return HAL_I2C_Master_Receive(&device->hi2c, address << 1, value, 1, HAL_MAX_DELAY) == HAL_OK;
 }
 
-void API_I2C_DEVICE_setAddress(I2C_Device_t * device, uint16_t address) {
+bool_t API_I2C_DEVICE_SetAddress(I2C_Device_t *device, uint16_t address) {
+	if (device == NULL) {
+		return false;
+	}
+
 	device->deviceAddress = address;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_GetAddress(const I2C_Device_t *device, uint16_t *address) {
+	if (device == NULL || address == NULL) {
+		return false;
+	}
+
+	*address = device->deviceAddress;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_SetInstance(I2C_Device_t *device, I2C_TypeDef *i2cInstance) {
+	if (device == NULL || i2cInstance == NULL) {
+		return false;
+	}
+
+	device->hi2c.Instance = i2cInstance;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_GetInstance(const I2C_Device_t *device, I2C_TypeDef **i2cInstance) {
+	if (device == NULL || i2cInstance == NULL) {
+		return false;
+	}
+
+	*i2cInstance = device->hi2c.Instance;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_SetClockSpeed(I2C_Device_t *device, uint32_t clockSpeed) {
+	if (device == NULL) {
+		return false;
+	}
+
+	device->hi2c.Init.ClockSpeed = clockSpeed;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_GetClockSpeed(const I2C_Device_t *device, uint32_t *clockSpeed) {
+	if (device == NULL || clockSpeed == NULL) {
+		return false;
+	}
+
+	*clockSpeed = device->hi2c.Init.ClockSpeed;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_SetDutyCycle(I2C_Device_t *device, uint32_t dutyCycle) {
+	if (device == NULL) {
+		return false;
+	}
+
+	device->hi2c.Init.DutyCycle = dutyCycle;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_GetDutyCycle(const I2C_Device_t *device, uint32_t *dutyCycle) {
+	if (device == NULL || dutyCycle == NULL) {
+		return false;
+	}
+
+	*dutyCycle = device->hi2c.Init.DutyCycle;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_SetOwnAddress1(I2C_Device_t *device, uint32_t ownAddress1) {
+	if (device == NULL) {
+		return false;
+	}
+
+	device->hi2c.Init.OwnAddress1 = ownAddress1;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_GetOwnAddress1(const I2C_Device_t *device, uint32_t *ownAddress1) {
+	if (device == NULL || ownAddress1 == NULL) {
+		return false;
+	}
+
+	*ownAddress1 = device->hi2c.Init.OwnAddress1;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_SetAddressingMode(I2C_Device_t *device, uint32_t addressingMode) {
+	if (device == NULL) {
+		return false;
+	}
+
+	device->hi2c.Init.AddressingMode = addressingMode;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_GetAddressingMode(const I2C_Device_t *device, uint32_t *addressingMode) {
+	if (device == NULL || addressingMode == NULL) {
+		return false;
+	}
+
+	*addressingMode = device->hi2c.Init.AddressingMode;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_SetDualAddressMode(I2C_Device_t *device, uint32_t dualAddressMode) {
+	if (device == NULL) {
+		return false;
+	}
+
+	device->hi2c.Init.DualAddressMode = dualAddressMode;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_GetDualAddressMode(const I2C_Device_t *device, uint32_t *dualAddressMode) {
+	if (device == NULL || dualAddressMode == NULL) {
+		return false;
+	}
+
+	*dualAddressMode = device->hi2c.Init.DualAddressMode;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_SetOwnAddress2(I2C_Device_t *device, uint32_t ownAddress2) {
+	if (device == NULL) {
+		return false;
+	}
+
+	device->hi2c.Init.OwnAddress2 = ownAddress2;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_GetOwnAddress2(const I2C_Device_t *device, uint32_t *ownAddress2) {
+	if (device == NULL || ownAddress2 == NULL) {
+		return false;
+	}
+
+	*ownAddress2 = device->hi2c.Init.OwnAddress2;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_SetGeneralCallMode(I2C_Device_t *device, uint32_t generalCallMode) {
+	if (device == NULL) {
+		return false;
+	}
+
+	device->hi2c.Init.GeneralCallMode = generalCallMode;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_GetGeneralCallMode(const I2C_Device_t *device, uint32_t *generalCallMode) {
+	if (device == NULL || generalCallMode == NULL) {
+		return false;
+	}
+
+	*generalCallMode = device->hi2c.Init.GeneralCallMode;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_SetNoStretchMode(I2C_Device_t *device, uint32_t noStretchMode) {
+	if (device == NULL) {
+		return false;
+	}
+
+	device->hi2c.Init.NoStretchMode = noStretchMode;
+
+	return true;
+}
+
+bool_t API_I2C_DEVICE_GetNoStretchMode(const I2C_Device_t *device, uint32_t *noStretchMode) {
+	if (device == NULL || noStretchMode == NULL) {
+		return false;
+	}
+
+	*noStretchMode = device->hi2c.Init.NoStretchMode;
+
+	return true;
 }
 
 /***********************************/
