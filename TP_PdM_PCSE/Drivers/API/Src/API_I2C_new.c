@@ -21,7 +21,7 @@ static bool_t initDefaultHi2c(I2C_Device_t* device, I2C_TypeDef *i2cInstance);
 static bool_t initDefaultHw(I2C_TypeDef *i2cInstance);
 static bool_t i2cDeviceReady(I2C_Device_t* device, uint16_t address);
 
-bool_t API_I2C_DefaultConfig(I2C_Device_t* device, I2C_TypeDef *i2cInstance) {
+bool_t API_I2C_DEVICE_DefaultConfig(I2C_Device_t* device, I2C_TypeDef *i2cInstance) {
 	if (device == NULL) {
 		return false;
 	}
@@ -33,7 +33,7 @@ bool_t API_I2C_DefaultConfig(I2C_Device_t* device, I2C_TypeDef *i2cInstance) {
 }
 
 // TODO agregar enum de errores
-bool_t API_I2C_Init(I2C_Device_t* device, uint16_t address) {
+bool_t API_I2C_DEVICE_Init(I2C_Device_t* device, uint16_t address) {
 	if (device == NULL) {
 		return false;
 	}
@@ -50,21 +50,21 @@ bool_t API_I2C_Init(I2C_Device_t* device, uint16_t address) {
 	return true;
 }
 
-bool_t API_I2C_Tx(I2C_Device_t* device, uint16_t address, uint8_t *value, uint16_t size) {
+bool_t API_I2C_DEVICEDEVICETx(I2C_Device_t* device, uint16_t address, uint8_t *value, uint16_t size) {
 	if (device == NULL || value == NULL || size == 0U) {
 		return false;
 	}
 	return HAL_I2C_Master_Transmit(&device->hi2c, address << 1, value, size, HAL_MAX_DELAY) == HAL_OK;
 }
 
-bool_t API_I2C_Rx(I2C_Device_t* device, uint16_t address, uint8_t* value) {
+bool_t API_I2C_DEVICE_Rx(I2C_Device_t* device, uint16_t address, uint8_t* value) {
 	if (device == NULL || value == NULL) {
 		return false;
 	}
 	return HAL_I2C_Master_Receive(&device->hi2c, address << 1, value, 1, HAL_MAX_DELAY) == HAL_OK;
 }
 
-void API_I2C_SetAddress(I2C_Device_t * device, uint16_t address) {
+void API_I2C_DEVICE_setAddress(I2C_Device_t * device, uint16_t address) {
 	device->deviceAddress = address;
 }
 
