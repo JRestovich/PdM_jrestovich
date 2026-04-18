@@ -33,17 +33,17 @@
 
 typedef struct tag_LCD_data_s
 {
-    uint8_t data :4;
-    uint8_t bakLight :1;
-    uint8_t enable :1;
+    uint8_t RS :1;
     uint8_t rsvd :1;
-    uint8_t type :1;
+    uint8_t enable :1;
+    uint8_t bakLight :1;
+    uint8_t data :4;
 } LCD_data_s;
 
 typedef union tag_LCD_data_u
 {
     LCD_data_s data;
-    uint8_t raw;
+    uint8_t dataRaw;
 } LCD_data_u;
 
 

@@ -5,6 +5,7 @@
  *      Author: joaquin
  */
 
+#include "API_LCD16x2.h"
 #include "API_lcd.h"
 #include "API_LCD16x2_port.h"
 #include "API_delay.h"
@@ -15,7 +16,9 @@ static const uint8_t LCD_INIT_CMD[]={ _4BIT_MODE,
                                       ENTRY_MODE+AUTOINCREMENT,
                                       RETURN_HOME };
 
-static void sendToLCD (uint8_t valor, bool_t tipo);
+static void send4bit(uint8_t valor, bool_t tipo);
+static void send8bit(uint8_t valor, bool_t tipo);
+static void controlLcd(uint8_t valor);
 
 static I2C_Device_t lcdPort;
 
@@ -26,14 +29,14 @@ bool_t API_LCD16x2_Init(void) {
 	}
 
 	HAL_Delay(DELAY20ms);
-	sendToLCD(COMANDO_INI1, CONTROL);
+	send4bit(COMANDO_INI1, CONTROL);
     HAL_Delay(DELAY10ms);
-    sendToLCD(COMANDO_INI1, CONTROL);
+    send4bit(COMANDO_INI1, CONTROL);
     HAL_Delay(DELAY1ms);
-    sendToLCD(COMANDO_INI1, CONTROL);
-    sendToLCD(COMANDO_INI2, CONTROL);
+    send4bit(COMANDO_INI1, CONTROL);
+    send4bit(COMANDO_INI2, CONTROL);
     for(uint8_t i=0; i < sizeof(LCD_INIT_CMD); i++) {
-    	ControlLcd(LCD_INIT_CMD[i]);
+    	controlLcd(LCD_INIT_CMD[i]);
     }
     HAL_Delay(DELAY2ms);
     return true;
@@ -41,9 +44,29 @@ bool_t API_LCD16x2_Init(void) {
 
 /**********************************/
 
-static void sendToLCD (uint8_t valor, bool_t tipo) {
-	API_LCD16x2_port_Write_Byte(&lcdPort, valor+tipo+EN+BL);
+static void controlLcd(uint8_t valor) {
+	send8bit(valor, CONTROL);
+}
+
+static void send8bit(uint8_t valor, bool_t tipo) {
+	send4bit(valor & HIGH_NIBBLE, tipo);
+	send4bit(valor << LOW_NIBBLE, tipo);
+}
+
+static void send4bit(uint8_t valor, bool_t tipo) {
+	LCD_data_u lcdData = {0};
+
+	/* El nibble llega alineado en bits 7..4, como en API_lcd.c; se desplaza
+	 * para cargar el campo de 4 bits y que dataRaw lo reubique al nibble alto.
+	 */
+	lcdData.data.data = valor >> LOW_NIBBLE;
+	lcdData.data.bakLight = 1U;
+	lcdData.data.enable = 1U;
+	lcdData.data.RS = tipo;
+	API_LCD16x2_port_Write_Byte(&lcdPort, lcdData.dataRaw);
 	HAL_Delay(DelayTime);
-	API_LCD16x2_port_Write_Byte(&lcdPort, valor+tipo+BL);
+
+	lcdData.data.enable = 0U;
+	API_LCD16x2_port_Write_Byte(&lcdPort, lcdData.dataRaw);
 	HAL_Delay(DelayTime);
 }
