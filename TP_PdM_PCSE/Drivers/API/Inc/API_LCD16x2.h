@@ -26,6 +26,8 @@
 #define SET_DDRAM (1<<7)
 /************************************/
 #define DISPLAY_ON (1<<2)
+#define SHIFT_RIGHT (1<<2)
+#define DISPLAY_SHIFT (1<<3)
 #define CURSOR_ON (1<<1)
 #define CURSOR_BLINK 1
 #define AUTOINCREMENT (1<<1)
@@ -54,5 +56,6 @@ void API_LCD16x2_SendString(char* data, uint16_t size);
 void API_LCD16x2_Clear(void);
 void API_LCD16x2_FirstRow(uint8_t pos);
 void API_LCD16x2_SecondRow(uint8_t pos);
+void API_LCD16x2_ShiftDisplay(bool_t right);
 
 #endif /* API_INC_API_LCD16X2_H_ */

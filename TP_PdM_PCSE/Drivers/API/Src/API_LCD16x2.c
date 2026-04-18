@@ -65,6 +65,16 @@ void API_LCD16x2_SecondRow(uint8_t pos) {
 	controlLcd(pos | LINEA2);
 }
 
+void API_LCD16x2_ShiftDisplay(bool_t right) {
+	uint8_t shiftCmd = CURSOR_DISPLAY_SHIFT | DISPLAY_SHIFT;
+
+	if (right) {
+		shiftCmd |= SHIFT_RIGHT;
+	}
+
+	controlLcd(shiftCmd);
+}
+
 /**********************************/
 
 static void controlLcd(uint8_t valor) {
