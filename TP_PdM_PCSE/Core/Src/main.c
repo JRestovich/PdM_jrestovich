@@ -55,8 +55,9 @@ int main(void)
 		Error_Handler();
 	}
 
-	char msg1[] = "Hola Patasu";
-	char msg2[] = "xD";
+	char msg1[] = "Holaaaaaaaaaaaaaaaaaaaa";
+	char msg2[] = "i2cccccccccccccccccccc";
+	bool_t shiftRight = true;
 
 	API_LCD16x2_Clear();
 	API_LCD16x2_FirstRow(0);
@@ -66,7 +67,9 @@ int main(void)
 
     while (1)
     {
-    	HAL_Delay(1000);
+    	HAL_Delay(5000);
+    	API_LCD16x2_ShiftDisplay(!shiftRight);
+    	// shiftRight = !shiftRight;
     }
 
 }
