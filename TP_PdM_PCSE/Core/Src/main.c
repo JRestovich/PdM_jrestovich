@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "API_lcd.h"
+#include "API_LCD16x2.h"
 
 /* Private define ------------------------------------------------------------*/
 #include <stdbool.h>
@@ -43,8 +43,6 @@ bool_t uartInit();
   */
 int main(void)
 {
-	uint8_t lcdPortValue = 0;
-
 	HAL_Init();
 	SystemClock_Config();
 
@@ -52,22 +50,19 @@ int main(void)
 		Error_Handler();
 	}
 
-	if (Init_Lcd() != LCD_OK) {
+	if (!API_LCD16x2_Init()) {
 		printf("Error al inicializar el LCD\r\n");
 		Error_Handler();
 	}
 
-	if (LCD_EstaVivo(&lcdPortValue) == LCD_OK) {
-		printf("LCD vivo, puerto PCF8574 = 0x%02X\r\n", lcdPortValue);
-	} else {
-		printf("LCD no responde en lectura\r\n");
-	}
+	char msg1[] = "Hola Patasu";
+	char msg2[] = "xD";
 
-	ClrLcd();
-	PosCaracHLcd(0);
-	SacaTextoLcd((uint8_t *)"Hola");
-	PosCaracLLcd(0);
-	SacaTextoLcd((uint8_t *)"LCD OK");
+	API_LCD16x2_Clear();
+	API_LCD16x2_FirstRow(0);
+	API_LCD16x2_SendString(msg1, strlen(msg1));
+	API_LCD16x2_SecondRow(0);
+	API_LCD16x2_SendString(msg2, strlen(msg2));
 
     while (1)
     {
