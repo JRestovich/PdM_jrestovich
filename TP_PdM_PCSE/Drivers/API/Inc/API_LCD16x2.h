@@ -49,5 +49,10 @@ typedef union tag_LCD_data_u
 
 
 bool_t API_LCD16x2_Init(void);
+void API_LCD16x2_SendByte(char byte);
+void API_LCD16x2_SendString(char* data, uint16_t size);
+void API_LCD16x2_Clear(void);
+void API_LCD16x2_FirstRow(uint8_t pos);
+void API_LCD16x2_SecondRow(uint8_t pos);
 
 #endif /* API_INC_API_LCD16X2_H_ */

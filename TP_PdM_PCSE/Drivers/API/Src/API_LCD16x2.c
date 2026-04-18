@@ -42,6 +42,29 @@ bool_t API_LCD16x2_Init(void) {
     return true;
 }
 
+void API_LCD16x2_SendByte(char byte) {
+	send8bit((uint8_t) byte, DATOS);
+}
+
+void API_LCD16x2_SendString(char* data, uint16_t size) {
+	for (uint16_t i = 0; i < size; i++) {
+		API_LCD16x2_SendByte(data[i]);
+	}
+}
+
+void API_LCD16x2_Clear(void) {
+	controlLcd(CLR_LCD);
+	HAL_Delay(DELAY2ms);
+}
+
+void API_LCD16x2_FirstRow(uint8_t pos) {
+	controlLcd(pos | LINEA1);
+}
+
+void API_LCD16x2_SecondRow(uint8_t pos) {
+	controlLcd(pos | LINEA2);
+}
+
 /**********************************/
 
 static void controlLcd(uint8_t valor) {
