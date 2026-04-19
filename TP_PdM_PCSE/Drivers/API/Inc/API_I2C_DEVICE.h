@@ -84,7 +84,7 @@ bool_t API_I2C_DEVICE_Tx(I2C_Device_t *device, uint16_t address, uint8_t *value,
  * @return `true` si la recepción se completó correctamente, `false` si hubo un
  *         error o los parámetros son inválidos.
  */
-bool_t API_I2C_DEVICE_Rx(I2C_Device_t *device, uint16_t address, uint8_t *value);
+bool_t API_I2C_DEVICE_Rx(I2C_Device_t *device, uint16_t address, uint8_t *value, uint16_t size);
 
 /**
  * @brief Lee uno o más bytes desde un registro interno del dispositivo I2C.

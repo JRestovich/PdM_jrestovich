@@ -22,11 +22,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "API_LCD16x2.h"
+#include "API_MPR121.h"
+#include "API_delay.h"
 
 /* Private define ------------------------------------------------------------*/
-#include <stdbool.h>
-typedef bool bool_t;
 
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart2;
@@ -34,6 +33,7 @@ UART_HandleTypeDef huart2;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 bool_t uartInit();
+static void reportTouchedKeys(void);
 
 /* Private user code ---------------------------------------------------------*/
 
@@ -50,32 +50,54 @@ int main(void)
 		Error_Handler();
 	}
 
-	if (!API_LCD16x2_Init()) {
-		printf("Error al inicializar el LCD\r\n");
+	if (!API_MPR121_init()) {
+		printf("Error al inicializar MPR121\r\n");
 		Error_Handler();
 	}
 
-  char msg1[] = "BIENVENIDOS";
-	char msg2[] = "<------------->";
-	bool_t shiftRight = true;
+	delay_t keyboardScanDelay;
 
-	API_LCD16x2_Clear();
-	API_LCD16x2_FirstRow(0);
-	// API_LCD16x2_SendString(msg1, strlen(msg1));
-  API_LCD16x2_LoadTextFromRight(msg1, strlen(msg1));
-	API_LCD16x2_SecondRow(0);
-	API_LCD16x2_SendString(msg2, strlen(msg2));
+	delayInit(&keyboardScanDelay, 100U);
 
-	int i;
-	for (i=0; i<16; i++) {
-		HAL_Delay(1000);
-		API_LCD16x2_ShiftDisplay(!shiftRight);
-	}
+	printf("Prueba MPR121 iniciada\r\n");
+	uint16_t keysValue = 0U;
 
     while (1)
     {
+    	if (API_MPR121_readKeys(&keysValue)) {
+    		reportTouchedKeys();
+    	}
     }
 
+}
+
+static void reportTouchedKeys(void)
+{
+	typedef struct {
+		MPR121_keyValue key;
+		const char *label;
+	} key_map_t;
+
+	static const key_map_t keyMap[] = {
+		{key_1, "1"},
+		{key_2, "2"},
+		{key_3, "3"},
+		{key_4, "4"},
+		{key_5, "5"},
+		{key_6, "6"},
+		{key_7, "7"},
+		{key_8, "8"},
+		{key_9, "9"},
+		{key_asterisk, "*"},
+		{key_0, "0"},
+		{key_hashtag, "#"},
+	};
+
+	for (size_t i = 0; i < (sizeof(keyMap) / sizeof(keyMap[0])); i++) {
+		if (API_MPR121_getKey(keyMap[i].key)) {
+			printf("Tecla tocada: %s\r\n", keyMap[i].label);
+		}
+	}
 }
 
 /**
