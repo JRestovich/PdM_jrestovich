@@ -8,6 +8,21 @@
 #include "API_MPR121_port.h"
 
 #define MPR121_ADDR (0x5A << 1)  // HAL usa dirección desplazada
+#define MPR121_REG_SOFTRESET 0x80
+#define MPR121_REG_ECR 0x5E
+#define MPR121_REG_TOUCH_THRESHOLD_BASE 0x41
+#define MPR121_REG_DEBOUNCE 0x5B
+#define MPR121_REG_CONFIG1 0x5C
+#define MPR121_REG_CONFIG2 0x5D
+
+#define MPR121_SOFTRESET_CMD 0x63
+#define MPR121_ECR_STOP_MODE 0x00
+#define MPR121_TOUCH_THRESHOLD 12
+#define MPR121_RELEASE_THRESHOLD 6
+#define MPR121_DEBOUNCE_VALUE 0x00
+#define MPR121_CONFIG1_VALUE 0x10
+#define MPR121_CONFIG2_VALUE 0x20
+#define MPR121_ECR_RUN_12_ELECTRODES 0x8C
 
 static I2C_HandleTypeDef hi2c;
 static bool_t initOk = false;
@@ -113,14 +128,26 @@ static bool_t initModule() {
 	uint8_t pData[25];
 
 	    // =========================================================
-	    // 1. Poner el MPR121 en STOP mode (deshabilita electrodos)
-	    // Esto es obligatorio antes de configurar registros
+	    // 0. Soft reset
+	    // Lleva al MPR121 a un estado conocido antes de configurar
 	    // =========================================================
-	    pData[0] = 0x5E;
-	    pData[1] = 0x00;
+	    pData[0] = MPR121_REG_SOFTRESET;
+	    pData[1] = MPR121_SOFTRESET_CMD;
 	    if (HAL_I2C_Master_Transmit(&hi2c, MPR121_ADDR, pData, 2, 1000) != HAL_OK) {
 	    	return false;
 	    }
+	    HAL_Delay(10);
+
+	    // =========================================================
+	    // 1. Poner el MPR121 en STOP mode (deshabilita electrodos)
+	    // Esto es obligatorio antes de configurar registros
+	    // =========================================================
+	    pData[0] = MPR121_REG_ECR;
+	    pData[1] = MPR121_ECR_STOP_MODE;
+	    if (HAL_I2C_Master_Transmit(&hi2c, MPR121_ADDR, pData, 2, 1000) != HAL_OK) {
+	    	return false;
+	    }
+	    HAL_Delay(5);
 
 	    // =========================================================
 	    // 2. Configurar thresholds (TOUCH / RELEASE)
@@ -131,11 +158,12 @@ static bool_t initModule() {
 	    //   Touch   = 12
 	    //   Release = 6
 	    // =========================================================
-	    pData[0] = 0x41;
+	    pData[0] = MPR121_REG_TOUCH_THRESHOLD_BASE;
+	    // Los registros siguientes son consecutivos, por eso el for avanza por offset.
 	    for (uint8_t i = 0; i < 12; i++)
 	    {
-	    	pData[1 + i*2] = 12;
-	    	pData[2 + i*2] = 6;
+	    	pData[1 + i*2] = MPR121_TOUCH_THRESHOLD;
+	    	pData[2 + i*2] = MPR121_RELEASE_THRESHOLD;
 	    }
 	    if (HAL_I2C_Master_Transmit(&hi2c, MPR121_ADDR, pData, 25, 1000) != HAL_OK) {
 			return false;
@@ -143,77 +171,39 @@ static bool_t initModule() {
 
 	    // =========================================================
 	    // 3. Configuración de filtros y adquisición (AFE)
-	    //
-	    // 0x5C = AFE Configuration
-	    //  - CDC: corriente de carga
-	    //  - FFI: cantidad de samples del primer filtro
-	    //
-	    // 0x5D = Filter Configuration
-	    //  - CDT: tiempo de carga
-	    //  - SFI: segundo filtro
-	    //  - ESI: intervalo de muestreo
-	    //
-	    // Estos valores son "default recomendados"
 	    // =========================================================
-	    pData[0] = 0x5C;
-	    pData[1] = 0x10;
+	    pData[0] = MPR121_REG_CONFIG1;
+	    pData[1] = MPR121_CONFIG1_VALUE;
 	    if (HAL_I2C_Master_Transmit(&hi2c, MPR121_ADDR, pData, 2, 1000) != HAL_OK) {
 			return false;
 		}
 
-	    pData[0] = 0x5D;
-		pData[1] = 0x24;
+	    pData[0] = MPR121_REG_CONFIG2;
+		pData[1] = MPR121_CONFIG2_VALUE;
 		if (HAL_I2C_Master_Transmit(&hi2c, MPR121_ADDR, pData, 2, 1000) != HAL_OK) {
 			return false;
 		}
 
 	    // =========================================================
 	    // 4. Configurar debounce
-	    // Evita falsos triggers por ruido
-	    // 0x22 = 2 lecturas consecutivas para validar cambio
+	    // Se deja en 0 como en la versión Arduino que sí detecta
 	    // =========================================================
-	    pData[0] = 0x5B;
-		pData[1] = 0x22;
+	    pData[0] = MPR121_REG_DEBOUNCE;
+		pData[1] = MPR121_DEBOUNCE_VALUE;
+		// pData[1] = 0x22;
 		if (HAL_I2C_Master_Transmit(&hi2c, MPR121_ADDR, pData, 2, 1000) != HAL_OK) {
 			return false;
 		}
 
 	    // =========================================================
-	    // 5. (Opcional pero recomendado) Auto-config
-	    // Ajusta automáticamente corriente y timing
+	    // 5. Habilitar electrodos
+	    // Se usa 0x8C como en Arduino: 12 electrodos + baseline tracking
 	    // =========================================================
-		pData[0] = 0x7B;
-		pData[1] = 0x0B;
+		pData[0] = MPR121_REG_ECR;
+		pData[1] = MPR121_ECR_RUN_12_ELECTRODES;
 		if (HAL_I2C_Master_Transmit(&hi2c, MPR121_ADDR, pData, 2, 1000) != HAL_OK) {
 			return false;
 		}
-
-	    // =========================================================
-	    // 6. Habilitar electrodos
-	    //
-	    // 0x5E:
-	    //  - bits [3:0] = cantidad de electrodos habilitados
-	    //
-	    // 0x0C → habilita 12 electrodos (ELE0–ELE11)
-	    // =========================================================
-		pData[0] = 0x5E;
-		pData[1] = 0x0C;
-		if (HAL_I2C_Master_Transmit(&hi2c, MPR121_ADDR, pData, 2, 1000) != HAL_OK) {
-			return false;
-		}
-
-		// Recomendado si usás auto-config
-		/* pData[0] = 0x7D;
-		pData[1] = 0x9C;
-		pData[2] = 0x65;
-		pData[3] = 0x8C;
-		if (HAL_I2C_Master_Transmit(&hi2c, MPR121_ADDR, pData, 4, 1000) != HAL_OK) {
-			return false;
-		} */
-
-	    // =========================================================
-	    // Listo: el módulo ya está midiendo y generando eventos
-	    // =========================================================
 
 	    return true;
 }

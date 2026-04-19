@@ -22,8 +22,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "API_intSensors.h"
-#include "API_led.h"
+#include "API_MPR121_port.h"
+#include "API_delay.h"
 
 /* Private define ------------------------------------------------------------*/
 
@@ -45,45 +45,33 @@ int main(void)
 	HAL_Init();
 	SystemClock_Config();
 
-	if (!API_intSensors_init()) {
-		Error_Handler();
-	}
-
 	if (!uartInit()) {
 		Error_Handler();
 	}
 
-	float temperatureC;
-	int32_t temperatureInt;
-	uint32_t temperatureFrac;
-	uint32_t voltageMv;
-	led_t boardLed;
-	bool_t boardLedState;
-	const char *boardLedStateStr;
-	const char *boardLedModeStr;
+	if (!API_MPR121_port_init()) {
+		printf("Error al inicializar MPR121\r\n");
+		Error_Handler();
+	}
 
-	API_LED_Init(&boardLed, LD2_GPIO_Port, LD2_Pin);
-	API_LED_SetMode(&boardLed, BLINK);
+	delay_t keyboardReportDelay;
+	uint16_t keysPressed = 0U;
+
+	delayInit(&keyboardReportDelay, 2000U);
+
+	printf("Prueba MPR121 iniciada\r\n");
 
     while (1)
     {
-    	API_LED_Engine(&boardLed);
-    	boardLedState = API_LED_GetValue(&boardLed);
-    	boardLedStateStr = boardLedState ? "ON" : "OFF";
-    	boardLedModeStr = (API_LED_GetMode(&boardLed) == BLINK) ? "BLINK" : "FIX";
-
-    	if (API_intSensors_readAllSensors(1000, &temperatureC, &voltageMv)) {
-    		temperatureInt = (int32_t)temperatureC;
-    		temperatureFrac = (uint32_t)((temperatureC - (float)temperatureInt) * 100.0f);
-
-    		printf("LED: %s (%s) | MCU temp: %ld.%02lu C | VDDA: %lu mV\r\n",
-    				boardLedStateStr,
-    				boardLedModeStr,
-    				(long)temperatureInt,
-    				(unsigned long)temperatureFrac,
-					(unsigned long)voltageMv);
+    	if (delayRead(&keyboardReportDelay)) {
+    		if (API_MPR121_port_readKeys(&keysPressed)) {
+    			printf("Teclas: 0x%03X (%u)\r\n",
+    					(unsigned int)keysPressed,
+						(unsigned int)keysPressed);
+    		} else {
+    			printf("Error al leer MPR121\r\n");
+    		}
     	}
-    	HAL_Delay(500);
     }
 
 }
