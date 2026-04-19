@@ -20,6 +20,11 @@ bool_t API_I2C_DEVICE_DefaultConfig(I2C_Device_t * device, I2C_TypeDef* i2cInsta
 bool_t API_I2C_DEVICE_Init(I2C_Device_t * device, uint16_t address);
 bool_t API_I2C_DEVICE_Tx(I2C_Device_t * device, uint16_t address, uint8_t *value, uint16_t size);
 bool_t API_I2C_DEVICE_Rx(I2C_Device_t * device, uint16_t address, uint8_t* value);
+bool_t API_I2C_DEVICE_MemRead(I2C_Device_t *device,
+		uint16_t registerAddress,
+		uint16_t registerAddressSize,
+		uint8_t *values,
+		uint16_t size);
 bool_t API_I2C_DEVICE_SetAddress(I2C_Device_t *device, uint16_t address);
 bool_t API_I2C_DEVICE_GetAddress(const I2C_Device_t *device, uint16_t *address);
 
