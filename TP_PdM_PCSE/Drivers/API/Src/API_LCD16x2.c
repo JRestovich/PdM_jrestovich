@@ -9,6 +9,10 @@
 #include "API_lcd.h"
 #include "API_LCD16x2_port.h"
 #include "API_delay.h"
+#include <stdio.h>
+#include <string.h>
+
+static const char blankDisplay[] = "                "; // 16 spaces 
 
 static const uint8_t LCD_INIT_CMD[]={ _4BIT_MODE,
                                       DISPLAY_CONTROL+DISPLAY_ON,
@@ -47,6 +51,9 @@ void API_LCD16x2_SendByte(char byte) {
 }
 
 void API_LCD16x2_SendString(char* data, uint16_t size) {
+	if (data == NULL) {
+		return;
+	}
 	for (uint16_t i = 0; i < size; i++) {
 		API_LCD16x2_SendByte(data[i]);
 	}
@@ -73,6 +80,17 @@ void API_LCD16x2_ShiftDisplay(bool_t right) {
 	}
 
 	controlLcd(shiftCmd);
+}
+
+void API_LCD16x2_LoadTextFromRight(char* data, uint16_t size) {
+	if (data == NULL) {
+		return;
+	}
+
+	char buffer[17 + size];
+	snprintf(buffer, sizeof(buffer), "%s%.*s", blankDisplay, size, data);
+
+	API_LCD16x2_SendString(buffer, strlen(buffer));
 }
 
 /**********************************/

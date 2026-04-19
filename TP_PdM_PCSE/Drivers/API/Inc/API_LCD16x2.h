@@ -57,5 +57,6 @@ void API_LCD16x2_Clear(void);
 void API_LCD16x2_FirstRow(uint8_t pos);
 void API_LCD16x2_SecondRow(uint8_t pos);
 void API_LCD16x2_ShiftDisplay(bool_t right);
+void API_LCD16x2_LoadTextFromRight(char* data, uint16_t size);
 
 #endif /* API_INC_API_LCD16X2_H_ */
