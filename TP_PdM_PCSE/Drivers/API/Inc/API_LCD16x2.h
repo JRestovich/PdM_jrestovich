@@ -52,12 +52,21 @@ typedef union tag_LCD_data_u
 
 bool_t API_LCD16x2_Init(void);
 void API_LCD16x2_SendByte(char byte);
-void API_LCD16x2_SendString(char* data, uint16_t size);
+void API_LCD16x2_SendString(const char* data, uint16_t size);
 void API_LCD16x2_Clear(void);
+void API_LCD16x2_Home(void);
+void API_LCD16x2_SetDisplayVisible(bool_t visible);
 void API_LCD16x2_SetCursorVisible(bool_t visible);
+void API_LCD16x2_SetCursorBlink(bool_t enable);
+void API_LCD16x2_SetCursor(uint8_t row, uint8_t col);
 void API_LCD16x2_FirstRow(uint8_t pos);
 void API_LCD16x2_SecondRow(uint8_t pos);
+void API_LCD16x2_WriteCharAt(uint8_t row, uint8_t col, char data);
+void API_LCD16x2_WriteStringAt(uint8_t row, uint8_t col, const char* data, uint16_t size);
+void API_LCD16x2_ShiftCursor(bool_t right);
 void API_LCD16x2_ShiftDisplay(bool_t right);
-void API_LCD16x2_LoadTextFromRight(char* data, uint16_t size);
+void API_LCD16x2_SetEntryMode(bool_t increment, bool_t shiftDisplay);
+void API_LCD16x2_Backlight(bool_t on);
+void API_LCD16x2_LoadTextFromRight(const char* data, uint16_t size);
 
 #endif /* API_INC_API_LCD16X2_H_ */

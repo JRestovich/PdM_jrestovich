@@ -63,8 +63,12 @@ static const uint8_t LCD_INIT_CMD[]={ _4BIT_MODE,
 static void send4bit(uint8_t valor, bool_t tipo);
 static void send8bit(uint8_t valor, bool_t tipo);
 static void controlLcd(uint8_t valor);
+static void writeDisplayControl(void);
 
 static I2C_Device_t lcdPort;
+static uint8_t displayControlFlags = DISPLAY_ON;
+static uint8_t entryModeFlags = AUTOINCREMENT;
+static bool_t backlightOn = true;
 
 bool_t API_LCD16x2_Init(void) {
 
@@ -78,10 +82,13 @@ bool_t API_LCD16x2_Init(void) {
     send4bit(COMANDO_INI1, CONTROL);
     HAL_Delay(DELAY1ms);
     send4bit(COMANDO_INI1, CONTROL);
-    send4bit(COMANDO_INI2, CONTROL);
+	send4bit(COMANDO_INI2, CONTROL);
     for(uint8_t i=0; i < sizeof(LCD_INIT_CMD); i++) {
     	controlLcd(LCD_INIT_CMD[i]);
     }
+    displayControlFlags = DISPLAY_ON;
+    entryModeFlags = AUTOINCREMENT;
+    backlightOn = true;
     HAL_Delay(DELAY2ms);
     return true;
 }
@@ -90,7 +97,7 @@ void API_LCD16x2_SendByte(char byte) {
 	send8bit((uint8_t) byte, DATOS);
 }
 
-void API_LCD16x2_SendString(char* data, uint16_t size) {
+void API_LCD16x2_SendString(const char* data, uint16_t size) {
 	if (data == NULL) {
 		return;
 	}
@@ -104,14 +111,52 @@ void API_LCD16x2_Clear(void) {
 	HAL_Delay(DELAY2ms);
 }
 
-void API_LCD16x2_SetCursorVisible(bool_t visible) {
-	uint8_t displayCmd = DISPLAY_CONTROL | DISPLAY_ON;
+void API_LCD16x2_Home(void) {
+	controlLcd(RETURN_HOME);
+	HAL_Delay(DELAY2ms);
+}
 
+void API_LCD16x2_SetDisplayVisible(bool_t visible) {
 	if (visible) {
-		displayCmd |= CURSOR_ON;
+		displayControlFlags |= DISPLAY_ON;
+	} else {
+		displayControlFlags &= (uint8_t) ~DISPLAY_ON;
 	}
 
-	controlLcd(displayCmd);
+	writeDisplayControl();
+}
+
+void API_LCD16x2_SetCursorVisible(bool_t visible) {
+	if (visible) {
+		displayControlFlags |= CURSOR_ON;
+	} else {
+		displayControlFlags &= (uint8_t) ~CURSOR_ON;
+	}
+
+	writeDisplayControl();
+}
+
+void API_LCD16x2_SetCursorBlink(bool_t enable) {
+	if (enable) {
+		displayControlFlags |= CURSOR_BLINK;
+	} else {
+		displayControlFlags &= (uint8_t) ~CURSOR_BLINK;
+	}
+
+	writeDisplayControl();
+}
+
+void API_LCD16x2_SetCursor(uint8_t row, uint8_t col) {
+	if (row > 1U || col > 15U) {
+		return;
+	}
+
+	if (row == 0U) {
+		API_LCD16x2_FirstRow(col);
+		return;
+	}
+
+	API_LCD16x2_SecondRow(col);
 }
 
 void API_LCD16x2_FirstRow(uint8_t pos) {
@@ -120,6 +165,30 @@ void API_LCD16x2_FirstRow(uint8_t pos) {
 
 void API_LCD16x2_SecondRow(uint8_t pos) {
 	controlLcd(pos | LINEA2);
+}
+
+void API_LCD16x2_WriteCharAt(uint8_t row, uint8_t col, char data) {
+	API_LCD16x2_SetCursor(row, col);
+	API_LCD16x2_SendByte(data);
+}
+
+void API_LCD16x2_WriteStringAt(uint8_t row, uint8_t col, const char* data, uint16_t size) {
+	if (data == NULL) {
+		return;
+	}
+
+	API_LCD16x2_SetCursor(row, col);
+	API_LCD16x2_SendString(data, size);
+}
+
+void API_LCD16x2_ShiftCursor(bool_t right) {
+	uint8_t shiftCmd = CURSOR_DISPLAY_SHIFT;
+
+	if (right) {
+		shiftCmd |= SHIFT_RIGHT;
+	}
+
+	controlLcd(shiftCmd);
 }
 
 void API_LCD16x2_ShiftDisplay(bool_t right) {
@@ -132,7 +201,26 @@ void API_LCD16x2_ShiftDisplay(bool_t right) {
 	controlLcd(shiftCmd);
 }
 
-void API_LCD16x2_LoadTextFromRight(char* data, uint16_t size) {
+void API_LCD16x2_SetEntryMode(bool_t increment, bool_t shiftDisplay) {
+	entryModeFlags = 0U;
+
+	if (increment) {
+		entryModeFlags |= AUTOINCREMENT;
+	}
+
+	if (shiftDisplay) {
+		entryModeFlags |= 1U;
+	}
+
+	controlLcd(ENTRY_MODE | entryModeFlags);
+}
+
+void API_LCD16x2_Backlight(bool_t on) {
+	backlightOn = on;
+	controlLcd(DISPLAY_CONTROL | displayControlFlags);
+}
+
+void API_LCD16x2_LoadTextFromRight(const char* data, uint16_t size) {
 	if (data == NULL) {
 		return;
 	}
@@ -149,6 +237,10 @@ static void controlLcd(uint8_t valor) {
 	send8bit(valor, CONTROL);
 }
 
+static void writeDisplayControl(void) {
+	controlLcd(DISPLAY_CONTROL | displayControlFlags);
+}
+
 static void send8bit(uint8_t valor, bool_t tipo) {
 	send4bit(valor & HIGH_NIBBLE, tipo);
 	send4bit(valor << LOW_NIBBLE, tipo);
@@ -161,7 +253,7 @@ static void send4bit(uint8_t valor, bool_t tipo) {
 	 * para cargar el campo de 4 bits y que dataRaw lo reubique al nibble alto.
 	 */
 	lcdData.data.data = valor >> LOW_NIBBLE;
-	lcdData.data.bakLight = 1U;
+	lcdData.data.bakLight = backlightOn ? 1U : 0U;
 	lcdData.data.enable = 1U;
 	lcdData.data.RS = tipo;
 	API_LCD16x2_port_Write_Byte(&lcdPort, lcdData.dataRaw);
