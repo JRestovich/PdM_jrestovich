@@ -72,11 +72,6 @@ bool_t API_MPR121_port_readKeys(uint16_t *keys) {
 	return true;
 }
 
-bool_t API_MPR121_port_getKeyValue(MPR121_keyValue key) {
-//	HAL_I2C_Mem_Write
-	return false;
-}
-
 /*****************************************************/
 static bool_t initModule() {
 	uint8_t pData[25];
