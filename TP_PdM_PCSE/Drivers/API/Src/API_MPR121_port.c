@@ -25,6 +25,10 @@
 #define MPR121_CONFIG2_VALUE 0x20
 #define MPR121_ECR_RUN_12_ELECTRODES 0x8C
 
+#define BUFFER_SIZE 25
+#define TWO_BYTES 2
+#define KEYS_QTY 12
+
 //static I2C_HandleTypeDef hi2c;
 static bool_t initOk = false;
 static I2C_Device_t device = {0};
@@ -48,14 +52,14 @@ bool_t API_MPR121_port_init() {
 }
 
 bool_t API_MPR121_port_readKeys(uint16_t *keys) {
-	uint8_t data[2] = {0};
+	uint8_t data[TWO_BYTES] = {0};
 
 	if (keys == NULL || !initOk) {
 		return false;
 	}
 
 	// Leer Touch Status LSB/MSB en una sola operación de lectura de registro.
-	if (!API_I2C_DEVICE_MemRead(&device, 0x00, I2C_MEMADD_SIZE_8BIT, data, 2)) {
+	if (!API_I2C_DEVICE_MemRead(&device, 0x00, I2C_MEMADD_SIZE_8BIT, data, TWO_BYTES)) {
 		return false;
 	}
 
@@ -74,7 +78,7 @@ bool_t API_MPR121_port_readKeys(uint16_t *keys) {
 
 /*****************************************************/
 static bool_t initModule() {
-	uint8_t pData[25];
+	uint8_t pData[BUFFER_SIZE];
 
 	    // =========================================================
 	    // 0. Soft reset
@@ -82,7 +86,7 @@ static bool_t initModule() {
 	    // =========================================================
 	    pData[0] = MPR121_REG_SOFTRESET;
 	    pData[1] = MPR121_SOFTRESET_CMD;
-	    if (!API_I2C_DEVICE_Tx(&device, device.deviceAddress, pData, 2)) {
+	    if (!API_I2C_DEVICE_Tx(&device, device.deviceAddress, pData, TWO_BYTES)) {
 			return false;
 		}
 	    HAL_Delay(10);
@@ -93,7 +97,7 @@ static bool_t initModule() {
 	    // =========================================================
 	    pData[0] = MPR121_REG_ECR;
 	    pData[1] = MPR121_ECR_STOP_MODE;
-	    if (!API_I2C_DEVICE_Tx(&device, device.deviceAddress, pData, 2)) {
+	    if (!API_I2C_DEVICE_Tx(&device, device.deviceAddress, pData, TWO_BYTES)) {
 			return false;
 		}
 	    HAL_Delay(5);
@@ -109,12 +113,12 @@ static bool_t initModule() {
 	    // =========================================================
 	    pData[0] = MPR121_REG_TOUCH_THRESHOLD_BASE;
 	    // Los registros siguientes son consecutivos, por eso el for avanza por offset.
-	    for (uint8_t i = 0; i < 12; i++)
+	    for (uint8_t i = 0; i < KEYS_QTY; i++)
 	    {
 	    	pData[1 + i*2] = MPR121_TOUCH_THRESHOLD;
 	    	pData[2 + i*2] = MPR121_RELEASE_THRESHOLD;
 	    }
-	    if (!API_I2C_DEVICE_Tx(&device, device.deviceAddress, pData, 25)) {
+	    if (!API_I2C_DEVICE_Tx(&device, device.deviceAddress, pData, BUFFER_SIZE)) {
 			return false;
 		}
 
@@ -123,13 +127,13 @@ static bool_t initModule() {
 	    // =========================================================
 	    pData[0] = MPR121_REG_CONFIG1;
 	    pData[1] = MPR121_CONFIG1_VALUE;
-	    if (!API_I2C_DEVICE_Tx(&device, device.deviceAddress, pData, 2)) {
+	    if (!API_I2C_DEVICE_Tx(&device, device.deviceAddress, pData, TWO_BYTES)) {
 			return false;
 		}
 
 	    pData[0] = MPR121_REG_CONFIG2;
 		pData[1] = MPR121_CONFIG2_VALUE;
-		if (!API_I2C_DEVICE_Tx(&device, device.deviceAddress, pData, 2)) {
+		if (!API_I2C_DEVICE_Tx(&device, device.deviceAddress, pData, TWO_BYTES)) {
 			return false;
 		}
 
@@ -140,7 +144,7 @@ static bool_t initModule() {
 	    pData[0] = MPR121_REG_DEBOUNCE;
 		pData[1] = MPR121_DEBOUNCE_VALUE;
 		// pData[1] = 0x22;
-		if (!API_I2C_DEVICE_Tx(&device, device.deviceAddress, pData, 2)) {
+		if (!API_I2C_DEVICE_Tx(&device, device.deviceAddress, pData, TWO_BYTES)) {
 			return false;
 		}
 
@@ -150,7 +154,7 @@ static bool_t initModule() {
 	    // =========================================================
 		pData[0] = MPR121_REG_ECR;
 		pData[1] = MPR121_ECR_RUN_12_ELECTRODES;
-		if (!API_I2C_DEVICE_Tx(&device, device.deviceAddress, pData, 2)) {
+		if (!API_I2C_DEVICE_Tx(&device, device.deviceAddress, pData, TWO_BYTES)) {
 			return false;
 		}
 
