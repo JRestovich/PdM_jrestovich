@@ -1,11 +1,14 @@
-/*
- * API_LCD16x2_port.c
+/**
+ * @file API_LCD16x2_port.c
+ * @brief Implementación del port I2C para el display LCD 16x2.
  *
- *  Created on: Apr 17, 2026
- *      Author: joaquin
+ * Este archivo contiene la lógica de acceso físico al expansor I2C utilizado
+ * por el módulo LCD 16x2. La documentación de la API pública se mantiene en
+ * `API_LCD16x2_port.h`, por lo que aquí no se vuelve a documentar dicha
+ * interfaz.
  */
-#include "API_LCD16x2_port.h"
 
+#include "API_LCD16x2_port.h"
 
 bool_t API_LCD16x2_port_Init(I2C_Device_t *port, uint16_t address, I2C_TypeDef *i2cInstance) {
 	if (port == NULL) {
