@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "API_MPR121_port.h"
+#include "API_MPR121.h"
 #include "API_delay.h"
 
 /* Private define ------------------------------------------------------------*/
@@ -33,6 +33,7 @@ UART_HandleTypeDef huart2;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 bool_t uartInit();
+static void reportTouchedKeys(void);
 
 /* Private user code ---------------------------------------------------------*/
 
@@ -49,31 +50,54 @@ int main(void)
 		Error_Handler();
 	}
 
-	if (!API_MPR121_port_init()) {
+	if (!API_MPR121_init()) {
 		printf("Error al inicializar MPR121\r\n");
 		Error_Handler();
 	}
 
-	delay_t keyboardReportDelay;
-	uint16_t keysPressed = 0U;
+	delay_t keyboardScanDelay;
 
-	delayInit(&keyboardReportDelay, 2000U);
+	delayInit(&keyboardScanDelay, 100U);
 
 	printf("Prueba MPR121 iniciada\r\n");
+	uint16_t keysValue = 0U;
 
     while (1)
     {
-    	if (delayRead(&keyboardReportDelay)) {
-    		if (API_MPR121_port_readKeys(&keysPressed)) {
-    			printf("Teclas: 0x%03X (%u)\r\n",
-    					(unsigned int)keysPressed,
-						(unsigned int)keysPressed);
-    		} else {
-    			printf("Error al leer MPR121\r\n");
-    		}
+    	if (API_MPR121_readKeys(&keysValue)) {
+    		reportTouchedKeys();
     	}
     }
 
+}
+
+static void reportTouchedKeys(void)
+{
+	typedef struct {
+		MPR121_keyValue key;
+		const char *label;
+	} key_map_t;
+
+	static const key_map_t keyMap[] = {
+		{key_1, "1"},
+		{key_2, "2"},
+		{key_3, "3"},
+		{key_4, "4"},
+		{key_5, "5"},
+		{key_6, "6"},
+		{key_7, "7"},
+		{key_8, "8"},
+		{key_9, "9"},
+		{key_asterisk, "*"},
+		{key_0, "0"},
+		{key_hashtag, "#"},
+	};
+
+	for (size_t i = 0; i < (sizeof(keyMap) / sizeof(keyMap[0])); i++) {
+		if (API_MPR121_getKey(keyMap[i].key)) {
+			printf("Tecla tocada: %s\r\n", keyMap[i].label);
+		}
+	}
 }
 
 /**
