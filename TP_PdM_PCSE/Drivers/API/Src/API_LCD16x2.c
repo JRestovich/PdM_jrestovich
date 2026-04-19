@@ -1,8 +1,11 @@
-/*
- * API_LCD16x2.c
+/**
+ * @file API_LCD16x2.c
+ * @brief Implementación de la API de alto nivel para el display LCD 16x2.
  *
- *  Created on: Apr 17, 2026
- *      Author: joaquin
+ * Este archivo implementa la secuencia de inicialización y las operaciones de
+ * control y escritura sobre el display LCD. La documentación de la API pública
+ * se mantiene en `API_LCD16x2.h`, mientras que aquí se documentan únicamente
+ * los elementos privados del módulo.
  */
 
 #include "API_LCD16x2.h"
@@ -11,64 +14,83 @@
 #include <stdio.h>
 #include <string.h>
 
-#define LCD_DIR 0x27
+#define LCD_DIR 0x27U                   ///< Dirección I2C del expansor asociado al LCD.
+#define DATOS 1U                        ///< Selección de transferencia de datos hacia el LCD.
+#define CONTROL 0U                      ///< Selección de transferencia de comandos hacia el LCD.
+#define CLR_LCD 1U                      ///< Comando para limpiar el contenido del display.
+#define RETURN_HOME (1U << 1)           ///< Comando para retornar el cursor al origen.
+#define ENTRY_MODE (1U << 2)            ///< Comando base de configuración del modo de entrada.
+#define DISPLAY_CONTROL (1U << 3)       ///< Comando base de control de display y cursor.
+#define CURSOR_DISPLAY_SHIFT (1U << 4)  ///< Comando base de desplazamiento de cursor o display.
+#define FUNTION_SET (1U << 5)           ///< Comando de configuración de función del LCD.
+#define SET_CGRAM (1U << 6)             ///< Comando para seleccionar la memoria CGRAM.
+#define SET_DDRAM (1U << 7)             ///< Comando para seleccionar la memoria DDRAM.
+#define DISPLAY_ON (1U << 2)            ///< Máscara para habilitar la visualización del display.
+#define SHIFT_RIGHT (1U << 2)           ///< Máscara para desplazar hacia la derecha.
+#define DISPLAY_SHIFT (1U << 3)         ///< Máscara para desplazar todo el display.
+#define CURSOR_ON (1U << 1)             ///< Máscara para habilitar la visualización del cursor.
+#define CURSOR_BLINK 1U                 ///< Máscara para habilitar el parpadeo del cursor.
+#define AUTOINCREMENT (1U << 1)         ///< Máscara para incrementar automáticamente la dirección.
+#define _4BIT_MODE 0x28U                ///< Comando de inicialización del LCD en modo de 4 bits.
+#define DELAY20ms 20U                   ///< Demora inicial de estabilización del display.
+#define DELAY10ms 10U                   ///< Demora intermedia utilizada en la secuencia de arranque.
+#define DELAY2ms 2U                     ///< Demora requerida por comandos lentos del controlador.
+#define DELAY1ms 1U                     ///< Demora corta utilizada durante la inicialización.
+#define DelayTime 1U                    ///< Demora entre flancos de enable al enviar nibbles.
+#define HIGH_NIBBLE 0xF0U               ///< Máscara para extraer el nibble alto de un byte.
+#define LOW_NIBBLE 4U                   ///< Cantidad de bits para desplazar entre nibbles.
+#define LINEA1 0x80U                    ///< Dirección DDRAM base correspondiente a la primera fila.
+#define LINEA2 0xC0U                    ///< Dirección DDRAM base correspondiente a la segunda fila.
+#define COMANDO_INI1 0x30U              ///< Primer comando repetido de arranque en modo 8 bits.
+#define COMANDO_INI2 0x20U              ///< Comando de transición desde 8 bits hacia modo 4 bits.
 
-#define DATOS 1
-#define CONTROL 0
+static const char blankDisplay[] = "                ";  ///< Cadena de 16 espacios usada para efectos de entrada.
+static const uint8_t LCD_INIT_CMD[] = {                 ///< Secuencia de comandos estándar de inicialización del LCD.
+	_4BIT_MODE,
+	DISPLAY_CONTROL + DISPLAY_ON,
+	CLR_LCD,
+	ENTRY_MODE + AUTOINCREMENT,
+	RETURN_HOME
+};
 
-#define CLR_LCD 1
-#define RETURN_HOME (1<<1)
-#define ENTRY_MODE (1<<2)
-#define DISPLAY_CONTROL (1<<3)
-#define CURSOR_DISPLAY_SHIFT (1<<4)
-#define FUNTION_SET (1<<5)
-#define SET_CGRAM (1<<6)
-#define SET_DDRAM (1<<7)
-/************************************/
-#define DISPLAY_ON (1<<2)
-#define SHIFT_RIGHT (1<<2)
-#define DISPLAY_SHIFT (1<<3)
-#define CURSOR_ON (1<<1)
-#define CURSOR_BLINK 1
-#define AUTOINCREMENT (1<<1)
-#define _4BIT_MODE 0x28
-
-//DEMORAS NECESARIAS
-
-#define DELAY20ms 20
-#define DELAY10ms 10
-#define DELAY2ms  2
-#define DELAY1ms  1
-#define DelayTime 1
-
-//MANEJO DE NIBBLES
-#define HIGH_NIBBLE 0xf0
-#define LOW_NIBBLE 4
-
-//LINEAS DEL LCD
-#define LINEA1 0x80
-#define LINEA2 0xc0
-
-//COMANDOS DE INICIALIZACIÓN
-#define COMANDO_INI1 0x30
-#define COMANDO_INI2 0x20
-
-static const char blankDisplay[] = "                "; // 16 spaces
-static const uint8_t LCD_INIT_CMD[]={ _4BIT_MODE,
-                                      DISPLAY_CONTROL+DISPLAY_ON,
-                                      CLR_LCD,
-                                      ENTRY_MODE+AUTOINCREMENT,
-                                      RETURN_HOME };
-
+/**
+ * @brief Envía un nibble al LCD mediante el expansor I2C.
+ *
+ * Construye el byte de control correspondiente, conmuta la línea enable y
+ * transmite el nibble indicado como dato o comando.
+ *
+ * @param valor Nibble alineado en la mitad alta del byte.
+ * @param tipo Tipo de transferencia: dato o comando.
+ */
 static void send4bit(uint8_t valor, bool_t tipo);
+
+/**
+ * @brief Envía un byte completo al LCD en dos transferencias de nibble.
+ *
+ * @param valor Byte completo a transmitir.
+ * @param tipo Tipo de transferencia: dato o comando.
+ */
 static void send8bit(uint8_t valor, bool_t tipo);
+
+/**
+ * @brief Envía un comando de control al LCD.
+ *
+ * @param valor Comando a transmitir al controlador del display.
+ */
 static void controlLcd(uint8_t valor);
+
+/**
+ * @brief Reescribe en el LCD el estado actual de las banderas de visualización.
+ *
+ * Emite el comando de control de display utilizando el valor almacenado en las
+ * banderas privadas del módulo.
+ */
 static void writeDisplayControl(void);
 
-static I2C_Device_t lcdPort;
-static uint8_t displayControlFlags = DISPLAY_ON;
-static uint8_t entryModeFlags = AUTOINCREMENT;
-static bool_t backlightOn = true;
+static I2C_Device_t lcdPort;                      ///< Descriptor I2C privado asociado al display LCD.
+static uint8_t displayControlFlags = DISPLAY_ON; ///< Banderas actuales de visualización y cursor.
+static uint8_t entryModeFlags = AUTOINCREMENT;   ///< Banderas actuales del modo de entrada del LCD.
+static bool_t backlightOn = true;                ///< Estado actual de la retroiluminación del display.
 
 bool_t API_LCD16x2_Init(void) {
 
@@ -97,7 +119,7 @@ void API_LCD16x2_SendByte(char byte) {
 	send8bit((uint8_t) byte, DATOS);
 }
 
-void API_LCD16x2_SendString(const char* data, uint16_t size) {
+void API_LCD16x2_SendString(const char *data, uint16_t size) {
 	if (data == NULL) {
 		return;
 	}
@@ -172,7 +194,7 @@ void API_LCD16x2_WriteCharAt(uint8_t row, uint8_t col, char data) {
 	API_LCD16x2_SendByte(data);
 }
 
-void API_LCD16x2_WriteStringAt(uint8_t row, uint8_t col, const char* data, uint16_t size) {
+void API_LCD16x2_WriteStringAt(uint8_t row, uint8_t col, const char *data, uint16_t size) {
 	if (data == NULL) {
 		return;
 	}
@@ -220,7 +242,7 @@ void API_LCD16x2_Backlight(bool_t on) {
 	controlLcd(DISPLAY_CONTROL | displayControlFlags);
 }
 
-void API_LCD16x2_LoadTextFromRight(const char* data, uint16_t size) {
+void API_LCD16x2_LoadTextFromRight(const char *data, uint16_t size) {
 	if (data == NULL) {
 		return;
 	}
@@ -230,8 +252,6 @@ void API_LCD16x2_LoadTextFromRight(const char* data, uint16_t size) {
 
 	API_LCD16x2_SendString(buffer, strlen(buffer));
 }
-
-/**********************************/
 
 static void controlLcd(uint8_t valor) {
 	send8bit(valor, CONTROL);
@@ -249,9 +269,6 @@ static void send8bit(uint8_t valor, bool_t tipo) {
 static void send4bit(uint8_t valor, bool_t tipo) {
 	LCD_data_u lcdData = {0};
 
-	/* El nibble llega alineado en bits 7..4, como en API_lcd.c; se desplaza
-	 * para cargar el campo de 4 bits y que dataRaw lo reubique al nibble alto.
-	 */
 	lcdData.data.data = valor >> LOW_NIBBLE;
 	lcdData.data.bakLight = backlightOn ? 1U : 0U;
 	lcdData.data.enable = 1U;
