@@ -1,38 +1,45 @@
-/*
- * API_MPR121_port.c
+/**
+ * @file API_MPR121_port.c
+ * @brief Low-level MPR121 driver implementation.
  *
- *  Created on: Apr 13, 2026
- *      Author: joaquin
+ * Created on: Apr 13, 2026
+ * Author: joaquin
  */
 
 #include "API_MPR121_port.h"
 #include "API_I2C_DEVICE.h"
 
-#define MPR121_ADDR 0x5A
-#define MPR121_REG_SOFTRESET 0x80
-#define MPR121_REG_ECR 0x5E
-#define MPR121_REG_TOUCH_THRESHOLD_BASE 0x41
-#define MPR121_REG_DEBOUNCE 0x5B
-#define MPR121_REG_CONFIG1 0x5C
-#define MPR121_REG_CONFIG2 0x5D
+#define MPR121_ADDR 0x5A ///< I2C address of the MPR121 device.
+#define MPR121_REG_SOFTRESET 0x80 ///< Soft reset register address.
+#define MPR121_REG_ECR 0x5E ///< Electrode configuration register address.
+#define MPR121_REG_TOUCH_THRESHOLD_BASE 0x41 ///< Base address of touch threshold registers.
+#define MPR121_REG_DEBOUNCE 0x5B ///< Debounce register address.
+#define MPR121_REG_CONFIG1 0x5C ///< First filter configuration register address.
+#define MPR121_REG_CONFIG2 0x5D ///< Second filter configuration register address.
 
-#define MPR121_SOFTRESET_CMD 0x63
-#define MPR121_ECR_STOP_MODE 0x00
-#define MPR121_TOUCH_THRESHOLD 12
-#define MPR121_RELEASE_THRESHOLD 6
-#define MPR121_DEBOUNCE_VALUE 0x00
-#define MPR121_CONFIG1_VALUE 0x10
-#define MPR121_CONFIG2_VALUE 0x20
-#define MPR121_ECR_RUN_12_ELECTRODES 0x8C
+#define MPR121_SOFTRESET_CMD 0x63 ///< Command value used for device reset.
+#define MPR121_ECR_STOP_MODE 0x00 ///< ECR value used to stop all electrodes.
+#define MPR121_TOUCH_THRESHOLD 12 ///< Touch threshold applied to each electrode.
+#define MPR121_RELEASE_THRESHOLD 6 ///< Release threshold applied to each electrode.
+#define MPR121_DEBOUNCE_VALUE 0x00 ///< Debounce configuration value.
+#define MPR121_CONFIG1_VALUE 0x10 ///< CONFIG1 register value.
+#define MPR121_CONFIG2_VALUE 0x20 ///< CONFIG2 register value.
+#define MPR121_ECR_RUN_12_ELECTRODES 0x8C ///< ECR value used to enable 12 electrodes.
 
-#define BUFFER_SIZE 25
-#define TWO_BYTES 2
-#define KEYS_QTY 12
+#define BUFFER_SIZE 25 ///< Number of bytes sent during threshold configuration.
+#define TWO_BYTES 2 ///< Length of two-byte transfers.
+#define KEYS_QTY 12 ///< Number of keypad electrodes used.
 
 //static I2C_HandleTypeDef hi2c;
-static bool_t initOk = false;
-static I2C_Device_t device = {0};
+static bool_t initOk = false; ///< Indicates whether the port layer is initialized.
+static I2C_Device_t device = {0}; ///< I2C device descriptor used by the driver.
 
+/**
+ * @brief Configures the MPR121 after the I2C interface is initialized.
+ *
+ * @return true Configuration completed successfully.
+ * @return false Configuration failed.
+ */
 static bool_t initModule();
 
 bool_t API_MPR121_port_init() {
