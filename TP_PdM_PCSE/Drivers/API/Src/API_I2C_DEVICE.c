@@ -97,11 +97,11 @@ bool_t API_I2C_DEVICE_Tx(I2C_Device_t *device, uint16_t address, uint8_t *value,
 	return HAL_I2C_Master_Transmit(&device->hi2c, address << 1, value, size, HAL_MAX_DELAY) == HAL_OK;
 }
 
-bool_t API_I2C_DEVICE_Rx(I2C_Device_t *device, uint16_t address, uint8_t *value) {
+bool_t API_I2C_DEVICE_Rx(I2C_Device_t *device, uint16_t address, uint8_t *value, uint16_t size) {
 	if (device == NULL || value == NULL) {
 		return false;
 	}
-	return HAL_I2C_Master_Receive(&device->hi2c, address << 1, value, 1, HAL_MAX_DELAY) == HAL_OK;
+	return HAL_I2C_Master_Receive(&device->hi2c, address << 1, value, size, HAL_MAX_DELAY) == HAL_OK;
 }
 
 bool_t API_I2C_DEVICE_MemRead(I2C_Device_t *device,

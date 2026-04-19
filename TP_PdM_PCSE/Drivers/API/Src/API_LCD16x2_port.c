@@ -36,7 +36,7 @@ bool_t API_LCD16x2_port_Read_Byte(I2C_Device_t *port, uint8_t *value) {
 		return false;
 	}
 
-	return API_I2C_DEVICE_Rx(port, port->deviceAddress, value);
+	return API_I2C_DEVICE_Rx(port, port->deviceAddress, value, 1);
 }
 
 bool_t API_LCD16x2_port_Is_Alive(I2C_Device_t *port) {
