@@ -1,19 +1,36 @@
-/*
- * API_MPR121.c
+/**
+ * @file API_MPR121.c
+ * @brief MPR121 keypad driver implementation.
  *
- *  Created on: Apr 19, 2026
- *      Author: joaquin
+ * Created on: Apr 19, 2026
+ * Author: joaquin
  */
 #include "API_MPR121.h"
 #include "API_MPR121_port.h"
 
-#define RELEASED_VALUE 0U
+#define RELEASED_VALUE 0U ///< Value used when no key is active.
 
-static keyboardState state = RELEASED;
-static uint16_t lastValue = 0;
-static uint16_t actualValue = 0;
+static keyboardState state = RELEASED; ///< Current keypad state.
+static uint16_t lastValue = 0; ///< Last raw keypad value read from the device.
+static uint16_t actualValue = 0; ///< Last confirmed keypad value reported to the user.
 
+/**
+ * @brief Detects whether the keypad value changed since the last reading.
+ *
+ * @param newValue Pointer to the variable where the raw keypad value is stored.
+ * @return true The keypad value changed.
+ * @return false The keypad value did not change or the read failed.
+ */
 bool_t valueChange(uint16_t *newValue);
+
+/**
+ * @brief Updates the output value according to the current event state.
+ *
+ * @param update Indicates whether a new valid value is available.
+ * @param newValue Pointer to the variable where the reported value is stored.
+ * @return true A new value is available.
+ * @return false No new value is available.
+ */
 bool_t updateValue(bool_t update, uint16_t *newValue);
 
 bool_t API_MPR121_init() {
