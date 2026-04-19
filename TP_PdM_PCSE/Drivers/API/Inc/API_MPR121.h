@@ -25,8 +25,13 @@ typedef enum {
 	key_hashtag = (1<<11)
 } MPR121_keyValue;
 
+typedef enum {
+	RELEASED = 0,
+	PRESSED
+} keyboardState;
+
 bool_t API_MPR121_init();
-bool_t API_MPR121_newValue();
 bool_t API_MPR121_getKey(MPR121_keyValue key);
+bool_t API_MPR121_readKeys (uint16_t *newValue);
 
 #endif /* API_INC_API_MPR121_H_ */
