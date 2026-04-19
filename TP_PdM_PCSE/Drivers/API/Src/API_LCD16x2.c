@@ -104,6 +104,16 @@ void API_LCD16x2_Clear(void) {
 	HAL_Delay(DELAY2ms);
 }
 
+void API_LCD16x2_SetCursorVisible(bool_t visible) {
+	uint8_t displayCmd = DISPLAY_CONTROL | DISPLAY_ON;
+
+	if (visible) {
+		displayCmd |= CURSOR_ON;
+	}
+
+	controlLcd(displayCmd);
+}
+
 void API_LCD16x2_FirstRow(uint8_t pos) {
 	controlLcd(pos | LINEA1);
 }
