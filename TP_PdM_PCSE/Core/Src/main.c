@@ -55,21 +55,25 @@ int main(void)
 		Error_Handler();
 	}
 
-	char msg1[] = "Holaaaaaaaaaaaaaaaaaaaa";
-	char msg2[] = "i2cccccccccccccccccccc";
+  char msg1[] = "BIENVENIDOS";
+	char msg2[] = "<------------->";
 	bool_t shiftRight = true;
 
 	API_LCD16x2_Clear();
 	API_LCD16x2_FirstRow(0);
-	API_LCD16x2_SendString(msg1, strlen(msg1));
+	// API_LCD16x2_SendString(msg1, strlen(msg1));
+  API_LCD16x2_LoadTextFromRight(msg1, strlen(msg1));
 	API_LCD16x2_SecondRow(0);
 	API_LCD16x2_SendString(msg2, strlen(msg2));
 
+	int i;
+	for (i=0; i<16; i++) {
+		HAL_Delay(1000);
+		API_LCD16x2_ShiftDisplay(!shiftRight);
+	}
+
     while (1)
     {
-    	HAL_Delay(5000);
-    	API_LCD16x2_ShiftDisplay(!shiftRight);
-    	// shiftRight = !shiftRight;
     }
 
 }
