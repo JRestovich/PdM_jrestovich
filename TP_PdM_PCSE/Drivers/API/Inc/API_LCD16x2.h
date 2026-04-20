@@ -11,8 +11,12 @@
 #ifndef API_INC_API_LCD16X2_H_
 #define API_INC_API_LCD16X2_H_
 
+/********************************************************/
+/* Includes */
 #include "API_LCD16x2_port.h"
 
+/********************************************************/
+/* Declaracion de Tipos Publicos */
 /**
  * @brief Representación por campos del byte de control enviado al expansor.
  *
@@ -40,6 +44,8 @@ typedef union tag_LCD_data_u
     uint8_t dataRaw;
 } LCD_data_u;
 
+/********************************************************/
+/* Declaracion de Funciones Publicas */
 /**
  * @brief Inicializa el display LCD 16x2 y su port I2C asociado.
  *

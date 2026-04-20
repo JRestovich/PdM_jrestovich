@@ -8,12 +8,16 @@
  * los elementos privados del módulo.
  */
 
+/********************************************************/
+/* Includes */
 #include "API_LCD16x2.h"
 #include "API_LCD16x2_port.h"
 #include "API_delay.h"
 #include <stdio.h>
 #include <string.h>
 
+/********************************************************/
+/* Defines */
 #define LCD_DIR 0x27U                   ///< Dirección I2C del expansor asociado al LCD.
 #define DATOS 1U                        ///< Selección de transferencia de datos hacia el LCD.
 #define CONTROL 0U                      ///< Selección de transferencia de comandos hacia el LCD.
@@ -44,6 +48,8 @@
 #define COMANDO_INI1 0x30U              ///< Primer comando repetido de arranque en modo 8 bits.
 #define COMANDO_INI2 0x20U              ///< Comando de transición desde 8 bits hacia modo 4 bits.
 
+/********************************************************/
+/* Variables privadas */
 static const char blankDisplay[] = "                ";  ///< Cadena de 16 espacios usada para efectos de entrada.
 static const uint8_t LCD_INIT_CMD[] = {                 ///< Secuencia de comandos estándar de inicialización del LCD.
 	_4BIT_MODE,
@@ -53,6 +59,13 @@ static const uint8_t LCD_INIT_CMD[] = {                 ///< Secuencia de comand
 	RETURN_HOME
 };
 
+static I2C_Device_t lcdPort;                      ///< Descriptor I2C privado asociado al display LCD.
+static uint8_t displayControlFlags = DISPLAY_ON; ///< Banderas actuales de visualización y cursor.
+static uint8_t entryModeFlags = AUTOINCREMENT;   ///< Banderas actuales del modo de entrada del LCD.
+static bool_t backlightOn = true;                ///< Estado actual de la retroiluminación del display.
+
+/********************************************************/
+/* Declaracion de funciones privadas */
 /**
  * @brief Envía un nibble al LCD mediante el expansor I2C.
  *
@@ -87,11 +100,8 @@ static void controlLcd(uint8_t valor);
  */
 static void writeDisplayControl(void);
 
-static I2C_Device_t lcdPort;                      ///< Descriptor I2C privado asociado al display LCD.
-static uint8_t displayControlFlags = DISPLAY_ON; ///< Banderas actuales de visualización y cursor.
-static uint8_t entryModeFlags = AUTOINCREMENT;   ///< Banderas actuales del modo de entrada del LCD.
-static bool_t backlightOn = true;                ///< Estado actual de la retroiluminación del display.
-
+/********************************************************/
+/* Implementacion de funciones publicas */
 bool_t API_LCD16x2_Init(void) {
 
 	if (!API_LCD16x2_port_Init(&lcdPort, LCD_DIR, I2C2)) {
@@ -275,6 +285,8 @@ void API_LCD16x2_sendSingleNumber(uint8_t number) {
     API_LCD16x2_SendByte('0' + number);
 }
 
+/********************************************************/
+/* Implementacion de funciones privadas */
 static void controlLcd(uint8_t valor) {
 	send8bit(valor, CONTROL);
 }
