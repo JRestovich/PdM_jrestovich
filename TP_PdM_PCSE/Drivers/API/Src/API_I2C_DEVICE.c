@@ -8,8 +8,12 @@
  * que aquí se documentan únicamente los elementos privados del módulo.
  */
 
+/********************************************************/
+/* Includes */
 #include <API_I2C_DEVICE.h>
 
+/********************************************************/
+/* Defines */
 #define DEFAULT_CLK_SPEED 100000U     ///< Velocidad de reloj I2C por defecto en hertz.
 #define DEFAULT_SDA_I2C1 GPIO_PIN_9   ///< Pin SDA utilizado por la instancia I2C1.
 #define DEFAULT_SCL_I2C1 GPIO_PIN_8   ///< Pin SCL utilizado por la instancia I2C1.
@@ -18,6 +22,8 @@
 #define DEFAULT_SDA_I2C3 GPIO_PIN_4   ///< Pin SDA utilizado por la instancia I2C3.
 #define DEFAULT_SCL_I2C3 GPIO_PIN_8   ///< Pin SCL utilizado por la instancia I2C3.
 
+/********************************************************/
+/* Declaracion de funciones privadas */
 /**
  * @brief Inicializa el handler HAL del descriptor con una configuración I2C
  *        estándar.
@@ -62,6 +68,8 @@ static bool_t initDefaultHw(I2C_TypeDef *i2cInstance);
  */
 static bool_t i2cDeviceReady(I2C_Device_t *device, uint16_t address);
 
+/********************************************************/
+/* Implementacion de funciones publicas */
 bool_t API_I2C_DEVICE_DefaultConfig(I2C_Device_t *device, I2C_TypeDef *i2cInstance) {
 	if (device == NULL) {
 		return false;
@@ -322,6 +330,8 @@ bool_t API_I2C_DEVICE_GetNoStretchMode(const I2C_Device_t *device, uint32_t *noS
 	return true;
 }
 
+/********************************************************/
+/* Implementacion de funciones privadas */
 static bool_t initDefaultHi2c(I2C_Device_t *device, I2C_TypeDef *i2cInstance) {
 	if (device == NULL) {
 		return false;

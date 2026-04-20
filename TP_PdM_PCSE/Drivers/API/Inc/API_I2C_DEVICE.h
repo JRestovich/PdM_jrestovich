@@ -11,9 +11,13 @@
 #ifndef API_INC_API_I2C_DEVICE_H_
 #define API_INC_API_I2C_DEVICE_H_
 
+/********************************************************/
+/* Includes */
 #include <stdio.h>
 #include "typedefs.h"
 
+/********************************************************/
+/* Declaracion de Tipos Publicos */
 /**
  * @brief Descriptor de un dispositivo conectado al bus I2C.
  *
@@ -25,6 +29,8 @@ typedef struct {
     uint16_t deviceAddress;
 } I2C_Device_t;
 
+/********************************************************/
+/* Declaracion de Funciones Publicas */
 /**
  * @brief Carga en el descriptor una configuración I2C por defecto.
  *

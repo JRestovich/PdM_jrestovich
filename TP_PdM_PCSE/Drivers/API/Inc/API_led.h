@@ -11,10 +11,14 @@
 #ifndef API_INC_API_LED_H_
 #define API_INC_API_LED_H_
 
+/********************************************************/
+/* Includes */
 #include "stm32f4xx_hal.h"
 #include "API_delay.h"
 #include "API_led_port.h"
 
+/********************************************************/
+/* Declaracion de Tipos Publicos */
 /**
  * @brief Modos de funcionamiento disponibles para un LED.
  *
@@ -40,6 +44,8 @@ typedef struct {
 	delay_t delay;       ///< Retardo utilizado para temporizar el parpadeo.
 } led_t;
 
+/********************************************************/
+/* Declaracion de Funciones Publicas */
 /**
  * @brief Inicializa la logica del LED y su recurso de hardware asociado.
  *

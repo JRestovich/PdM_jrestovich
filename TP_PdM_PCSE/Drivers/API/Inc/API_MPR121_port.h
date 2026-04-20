@@ -9,8 +9,12 @@
 #ifndef API_INC_API_MPR121_PORT_H_
 #define API_INC_API_MPR121_PORT_H_
 
+/********************************************************/
+/* Includes */
 #include "typedefs.h"
 
+/********************************************************/
+/* Declaracion de Funciones Publicas */
 /**
  * @brief Initializes the MPR121 low-level interface.
  *

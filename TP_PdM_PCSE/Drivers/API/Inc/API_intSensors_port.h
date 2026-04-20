@@ -11,19 +11,12 @@
 #ifndef API_INTSENSORS_PORT_H_
 #define API_INTSENSORS_PORT_H_
 
-#include "stm32f4xx_hal.h"
+/********************************************************/
+/* Includes */
+#include "typedefs.h"
 
-#include <stdint.h>
-#include <stdbool.h>
-
-/**
- * @brief Tipo booleano utilizado por la interfaz de port del módulo.
- *
- * Se emplea para informar el resultado de las operaciones de inicialización,
- * adquisición y conversión realizadas por la capa dependiente del hardware.
- */
-typedef bool bool_t;
-
+/********************************************************/
+/* Declaracion de Funciones Publicas */
 /**
  * @brief Inicializa el periférico ADC y la secuencia de canales internos.
  *

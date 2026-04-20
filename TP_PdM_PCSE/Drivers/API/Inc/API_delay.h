@@ -8,12 +8,13 @@
 #ifndef API_INC_API_DELAY_H_
 #define API_INC_API_DELAY_H_
 
-#include "stm32f4xx_hal.h"
-#include <stdint.h>
-#include <stdbool.h>
+/********************************************************/
+/* Includes */
+#include "typedefs.h"
 
+/********************************************************/
+/* Declaracion de Tipos Publicos */
 typedef uint32_t tick_t;
-typedef bool bool_t;
 
 typedef struct {
   tick_t startTime;
@@ -21,6 +22,8 @@ typedef struct {
   bool_t running;
 } delay_t;
 
+/********************************************************/
+/* Declaracion de Funciones Publicas */
 /**
  * @brief Inicializa una estructura de retardo no bloqueante.
  * @param delay Puntero a la estructura delay_t que se desea inicializar.

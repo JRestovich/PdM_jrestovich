@@ -10,12 +10,12 @@
 #ifndef API_INC_API_LED_PORT_H_
 #define API_INC_API_LED_PORT_H_
 
-#include "stm32f4xx_hal.h"
-#include <stdbool.h>
+/********************************************************/
+/* Includes */
+#include "typedefs.h"
 
-
-typedef bool bool_t;
-
+/********************************************************/
+/* Declaracion de Tipos Publicos */
 /**
  * @brief Descriptor de hardware asociado a un LED.
  *
@@ -27,6 +27,8 @@ typedef struct {
 	uint16_t pin;        ///< Pin GPIO asociado al LED.
 } led_port_t;
 
+/********************************************************/
+/* Declaracion de Funciones Publicas */
 /**
  * @brief Inicializa el hardware asociado a un LED.
  *

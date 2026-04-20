@@ -11,8 +11,12 @@
 #ifndef API_INC_API_LCD16X2_PORT_H_
 #define API_INC_API_LCD16X2_PORT_H_
 
+/********************************************************/
+/* Includes */
 #include <API_I2C_DEVICE.h>
 
+/********************************************************/
+/* Declaracion de Funciones Publicas */
 /**
  * @brief Inicializa el port del LCD 16x2 sobre una instancia I2C dada.
  *

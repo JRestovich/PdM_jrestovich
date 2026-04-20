@@ -8,15 +8,11 @@
  * `API_intSensors_port`.
  */
 /********************************************************/
-/* Includes                                             */
-/********************************************************/
-
+/* Includes */
 #include "API_intSensors_port.h"
 
 /********************************************************/
-/* Implementacion de Funciones Publicas                 */
-/********************************************************/
-
+/* Implementacion de funciones publicas */
 bool_t API_intSensors_init(void) {
 	return API_intSensors_port_init();
 }

@@ -8,8 +8,12 @@
  * interfaz.
  */
 
+/********************************************************/
+/* Includes */
 #include "API_LCD16x2_port.h"
 
+/********************************************************/
+/* Implementacion de funciones publicas */
 bool_t API_LCD16x2_port_Init(I2C_Device_t *port, uint16_t address, I2C_TypeDef *i2cInstance) {
 	if (port == NULL) {
 		return false;

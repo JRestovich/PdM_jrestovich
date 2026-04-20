@@ -8,10 +8,14 @@
 #ifndef API_INC_TYPEDEFS_H_
 #define API_INC_TYPEDEFS_H_
 
+/********************************************************/
+/* Includes */
 #include "stm32f4xx_hal.h"
 #include <stdint.h>
 #include <stdbool.h>
 
+/********************************************************/
+/* Declaracion de Tipos Publicos */
 typedef bool bool_t;
 
 #endif /* API_INC_TYPEDEFS_H_ */

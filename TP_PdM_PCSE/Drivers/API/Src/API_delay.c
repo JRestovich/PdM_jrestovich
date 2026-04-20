@@ -5,8 +5,12 @@
  *      Author: joaquin
  */
 
+/********************************************************/
+/* Includes */
 #include "API_delay.h"
 
+/********************************************************/
+/* Implementacion de funciones publicas */
 void delayInit(delay_t* delay, tick_t duration)
 {
   if(delay == NULL) {

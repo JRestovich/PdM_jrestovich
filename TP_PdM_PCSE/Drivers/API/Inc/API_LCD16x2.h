@@ -11,8 +11,12 @@
 #ifndef API_INC_API_LCD16X2_H_
 #define API_INC_API_LCD16X2_H_
 
+/********************************************************/
+/* Includes */
 #include "API_LCD16x2_port.h"
 
+/********************************************************/
+/* Declaracion de Tipos Publicos */
 /**
  * @brief Representación por campos del byte de control enviado al expansor.
  *
@@ -40,6 +44,8 @@ typedef union tag_LCD_data_u
     uint8_t dataRaw;
 } LCD_data_u;
 
+/********************************************************/
+/* Declaracion de Funciones Publicas */
 /**
  * @brief Inicializa el display LCD 16x2 y su port I2C asociado.
  *
@@ -139,6 +145,28 @@ void API_LCD16x2_WriteCharAt(uint8_t row, uint8_t col, char data);
 void API_LCD16x2_WriteStringAt(uint8_t row, uint8_t col, const char *data, uint16_t size);
 
 /**
+ * @brief Actualiza el contenido completo de la primera fila del display.
+ *
+ * Limpia previamente la fila con espacios y luego escribe la cadena indicada
+ * desde la primera columna.
+ *
+ * @param data Puntero a la cadena a escribir en la primera fila.
+ * @param size Cantidad de caracteres de la cadena a transmitir.
+ */
+void API_LCD16x2_UpdateFirstRow(const char *data, uint16_t size);
+
+/**
+ * @brief Actualiza el contenido completo de la segunda fila del display.
+ *
+ * Limpia previamente la fila con espacios y luego escribe la cadena indicada
+ * desde la primera columna.
+ *
+ * @param data Puntero a la cadena a escribir en la segunda fila.
+ * @param size Cantidad de caracteres de la cadena a transmitir.
+ */
+void API_LCD16x2_UpdateSecondRow(const char *data, uint16_t size);
+
+/**
  * @brief Desplaza el cursor una posición hacia la izquierda o derecha.
  *
  * @param right `true` para desplazar hacia la derecha, `false` hacia la
@@ -179,5 +207,15 @@ void API_LCD16x2_Backlight(bool_t on);
  * @param size Cantidad de caracteres de la cadena a transmitir.
  */
 void API_LCD16x2_LoadTextFromRight(const char *data, uint16_t size);
+
+/**
+ * @brief Envía al LCD un único dígito decimal en la posición actual del cursor.
+ *
+ * Convierte el valor numérico recibido a su carácter ASCII equivalente y lo
+ * transmite al display. Esta función está pensada para dígitos individuales.
+ *
+ * @param number Dígito decimal a mostrar. Debe estar en el rango `0` a `9`.
+ */
+void API_LCD16x2_sendSingleNumber(uint8_t number);
 
 #endif /* API_INC_API_LCD16X2_H_ */
