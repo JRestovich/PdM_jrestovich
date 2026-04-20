@@ -10,14 +10,11 @@
 
 /********************************************************/
 /* Includes */
-#include "stm32f4xx_hal.h"
-#include <stdint.h>
-#include <stdbool.h>
+#include "typedefs.h"
 
 /********************************************************/
 /* Declaracion de Tipos Publicos */
 typedef uint32_t tick_t;
-typedef bool bool_t;
 
 typedef struct {
   tick_t startTime;
