@@ -15,8 +15,22 @@
 #include "API_delay.h"
 #include "API_led.h"
 
-#define LD2_GPIO_Port GPIOA
-#define LD2_Pin GPIO_PIN_5
+#define PORT_LED GPIOA
+#define PIN_LED GPIO_PIN_5
+#define LCD_BUFFER_SIZE 16U
+#define WELCOME_DELAY_MS 5000U
+#define ONE_SECOND_MS 1000U
+#define FREQ_BUFFER_SIZE 3U
+#define DECIMAL_BASE 10U
+#define MAX_VALID_FREQ_HZ 200U
+#define TEMPERATURE_SCALE_FACTOR 10.0f
+#define ASCII_ZERO '0'
+#define NEGATIVE_SIGN '-'
+#define DECIMAL_SEPARATOR '.'
+#define SPACE_CHAR ' '
+#define CELSIUS_UNIT 'C'
+#define MILLI_UNIT 'm'
+#define VOLT_UNIT 'V'
 //                                  = "0123456789ABCDEF";
 static const char welcomeMsg[]      = "Bienvenidos     ";
 static const char homeMsg[]         = "1Sensores-2Luces";
@@ -37,7 +51,7 @@ static uint8_t errorFlag = NO_ERROR;
 static led_t led;
 static delay_t delay;
 
-static uint8_t newFreq[3] = {0};
+static uint8_t newFreq[FREQ_BUFFER_SIZE] = {0};
 static uint8_t newFreqIndex = 0;
 
 static void printTemperatureDigits(float temperatureC);
@@ -57,10 +71,10 @@ bool_t APP_init() {
 	if (!API_intSensors_init()) {
         printf("Error al inicializar Sensores internos\r\n");
         errorFlag |= ERROR_INT_SENSORS;
-    }
-	API_LED_Init(&led, LD2_GPIO_Port, LD2_Pin);
-	delayInit(&delay, 5000);
-	API_LCD16x2_WriteStringAt(0, 0, welcomeMsg, strlen(welcomeMsg));
+	}
+	API_LED_Init(&led, PORT_LED, PIN_LED);
+	delayInit(&delay, WELCOME_DELAY_MS);
+	API_LCD16x2_UpdateFirstRow(welcomeMsg, strlen(welcomeMsg));
 
 	return errorFlag == NO_ERROR;
 }
@@ -88,7 +102,7 @@ bool_t APP_engine() {
         case init:
             if (delayRead(&delay)) {
                 state = home;
-                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+                API_LCD16x2_UpdateFirstRow(homeMsg, strlen(homeMsg));
             }
             break;
 
@@ -97,11 +111,11 @@ bool_t APP_engine() {
                 // Do nothing
             } else if (API_MPR121_getKey(key_1)) {
                 API_LCD16x2_Clear();
-                API_LCD16x2_WriteStringAt(0, 0, HomeSensors, strlen(HomeSensors));
+                API_LCD16x2_UpdateFirstRow(HomeSensors, strlen(HomeSensors));
                 state = analogSensors;
             } else if (API_MPR121_getKey(key_2)) {
                 API_LCD16x2_Clear();
-                API_LCD16x2_WriteStringAt(0, 0, homeLights, strlen(homeLights));
+                API_LCD16x2_UpdateFirstRow(homeLights, strlen(homeLights));
                 state = lights;
             }
             break;
@@ -111,44 +125,44 @@ bool_t APP_engine() {
                 // Do nothing
             } else if (API_MPR121_getKey(key_1)) {
                 API_LCD16x2_Clear();
-                API_LCD16x2_WriteStringAt(0, 0, temperature, strlen(temperature));
-                delayInit(&delay, 1000);
+                API_LCD16x2_UpdateFirstRow(temperature, strlen(temperature));
+                delayInit(&delay, ONE_SECOND_MS);
                 state = temperatureSensors;
             } else if (API_MPR121_getKey(key_2)) {
                 API_LCD16x2_Clear();
-                API_LCD16x2_WriteStringAt(0, 0, voltInput, strlen(voltInput));
+                API_LCD16x2_UpdateFirstRow(voltInput, strlen(voltInput));
                 state = voltimeterSensor;
-                delayInit(&delay, 1000);
+                delayInit(&delay, ONE_SECOND_MS);
             } else if (API_MPR121_getKey(key_asterisk)) {
                 state = home;
                 API_LCD16x2_Clear();
-                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+                API_LCD16x2_UpdateFirstRow(homeMsg, strlen(homeMsg));
             }
             break;
 
         case temperatureSensors:
             if (delayRead(&delay)) {
-                API_intSensors_readTempCelsius(1000, &sensorRead);
+                API_intSensors_readTempCelsius(ONE_SECOND_MS, &sensorRead);
                 printTemperatureDigits(sensorRead);
             } else if (!touched) {
                 // Do nothing
             } else if (API_MPR121_getKey(key_asterisk)) {
                 state = home;
                 API_LCD16x2_Clear();
-                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+                API_LCD16x2_UpdateFirstRow(homeMsg, strlen(homeMsg));
             }
             break;
 
         case voltimeterSensor:
             if (delayRead(&delay)) {
-                API_intSensors_readVoltMilliVolts(1000, &vinMv);
+                API_intSensors_readVoltMilliVolts(ONE_SECOND_MS, &vinMv);
                 printVinMv(vinMv);
             } else if (!touched) {
                 // Do nothing
             } else if (API_MPR121_getKey(key_asterisk)) {
                 state = home;
                 API_LCD16x2_Clear();
-                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+                API_LCD16x2_UpdateFirstRow(homeMsg, strlen(homeMsg));
             }
             break;
 
@@ -158,15 +172,15 @@ bool_t APP_engine() {
             } else if (API_MPR121_getKey(key_asterisk)) {
                 state = home;
                 API_LCD16x2_Clear();
-                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+                API_LCD16x2_UpdateFirstRow(homeMsg, strlen(homeMsg));
             } else if (API_MPR121_getKey(key_1)) {
                 state = lightsFix;
-                API_LCD16x2_WriteStringAt(0, 0, homeFix, strlen(homeFix));
+                API_LCD16x2_UpdateFirstRow(homeFix, strlen(homeFix));
                 API_LED_On(&led);
             } else if (API_MPR121_getKey(key_2)) {
                 state = lightsBlink;
                 API_LCD16x2_Clear();
-                API_LCD16x2_WriteStringAt(0, 0, homeBlink, strlen(homeBlink));
+                API_LCD16x2_UpdateFirstRow(homeBlink, strlen(homeBlink));
             }
             break;
 
@@ -176,12 +190,12 @@ bool_t APP_engine() {
             } else if (API_MPR121_getKey(key_asterisk)) {
                 state = home;
                 API_LCD16x2_Clear();
-                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+                API_LCD16x2_UpdateFirstRow(homeMsg, strlen(homeMsg));
             }  else if (API_MPR121_getKey(key_1)) {
-                API_LCD16x2_WriteStringAt(1, 0, ledOn, strlen(ledOn));
+                API_LCD16x2_UpdateSecondRow(ledOn, strlen(ledOn));
                 API_LED_On(&led);
             } else if (API_MPR121_getKey(key_2)) {
-                API_LCD16x2_WriteStringAt(1, 0, ledOff, strlen(ledOff));
+                API_LCD16x2_UpdateSecondRow(ledOff, strlen(ledOff));
                 API_LED_Off(&led);
             }
             break;
@@ -192,20 +206,20 @@ bool_t APP_engine() {
             } else if (API_MPR121_getKey(key_asterisk)) {
                 state = home;
                 API_LCD16x2_Clear();
-                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+                API_LCD16x2_UpdateFirstRow(homeMsg, strlen(homeMsg));
             }  else if (API_MPR121_getKey(key_1)) {
-                API_LCD16x2_WriteStringAt(1, 0, ledBlink, strlen(ledBlink));
+                API_LCD16x2_UpdateSecondRow(ledBlink, strlen(ledBlink));
                 API_LED_SetMode(&led, BLINK);
             }  else if (API_MPR121_getKey(key_2)) {
-                API_LCD16x2_WriteStringAt(1, 0, ledOff, strlen(ledOff));
+                API_LCD16x2_UpdateSecondRow(ledOff, strlen(ledOff));
                 API_LED_SetMode(&led, FIX);
             }  else if (API_MPR121_getKey(key_3)) {
                 state = lightsBlinkSetFreq;
                 newFreqIndex = 0;
                 memset(newFreq, 0, sizeof(newFreq)); ///< clear array
                 API_LCD16x2_Clear();
-                API_LCD16x2_WriteStringAt(0, 0, blinkFreq, strlen(blinkFreq));
-                API_LCD16x2_SecondRow(0);
+                API_LCD16x2_UpdateFirstRow(blinkFreq, strlen(blinkFreq));
+                API_LCD16x2_UpdateSecondRow("", 0U);
             }
             break;
 
@@ -215,7 +229,7 @@ bool_t APP_engine() {
             } else if (API_MPR121_getKey(key_asterisk)) {
                 state = home;
                 API_LCD16x2_Clear();
-                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+                API_LCD16x2_UpdateFirstRow(homeMsg, strlen(homeMsg));
             }  else if (API_MPR121_getKey(key_hashtag)) {
                 if (array2Num(&newFreq[0], newFreqIndex, &freqValue)) {
                     API_LED_SetBlinkFreq(&led, freqValue);
@@ -224,20 +238,20 @@ bool_t APP_engine() {
                 } else {
                     printf("freq not set: %lu \r\n", freqValue);
                     state = error;
-                    delayInit(&delay, 1000);
+                    delayInit(&delay, ONE_SECOND_MS);
                     API_LCD16x2_Clear();
-                    API_LCD16x2_WriteStringAt(0, 0, invalidFreq, strlen(invalidFreq));
+                    API_LCD16x2_UpdateFirstRow(invalidFreq, strlen(invalidFreq));
                 }
             } else if (API_MPR121_getSingleKey(&key)) {
                 API_LCD16x2_sendSingleNumber(key);
-                if (newFreqIndex < 3) {
+                if (newFreqIndex < FREQ_BUFFER_SIZE) {
                     newFreq[newFreqIndex] = key;
                     newFreqIndex++;
                 } else {
                     state = error;
-                    delayInit(&delay, 1000);
+                    delayInit(&delay, ONE_SECOND_MS);
                     API_LCD16x2_Clear();
-                    API_LCD16x2_WriteStringAt(0, 0, invalidFreq, strlen(invalidFreq));
+                    API_LCD16x2_UpdateFirstRow(invalidFreq, strlen(invalidFreq));
                 }
             }
             break;
@@ -245,7 +259,7 @@ bool_t APP_engine() {
         case error:
             if (delayRead(&delay)) {
                 state = home;
-                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+                API_LCD16x2_UpdateFirstRow(homeMsg, strlen(homeMsg));
             }
             break;
 
@@ -269,36 +283,36 @@ static void printTemperatureDigits(float temperatureC) {
 	uint8_t tens;
 	uint8_t units;
 	uint8_t firstDecimal;
-	char lcdValue[16];
+	char lcdValue[LCD_BUFFER_SIZE];
 
-	temperatureTenths = (int32_t)lroundf(temperatureC * 10.0f);
+	temperatureTenths = (int32_t)lroundf(temperatureC * TEMPERATURE_SCALE_FACTOR);
 	absTenths = abs(temperatureTenths);
 	splitFourDigits((uint32_t)absTenths, &hundreds, &tens, &units, &firstDecimal);
 
 	printf("temp: ");
 	if (temperatureTenths < 0) {
-		printf("-");
+		printf("%c", NEGATIVE_SIGN);
 	}
 	printf("%d%d%d.%d\r\n", hundreds, tens, units, firstDecimal);
 
 	if (temperatureTenths < 0) {
-		lcdValue[0] = '-';
-		lcdValue[1] = (char)('0' + hundreds);
-		lcdValue[2] = (char)('0' + tens);
-		lcdValue[3] = (char)('0' + units);
-		lcdValue[4] = '.';
-		lcdValue[5] = (char)('0' + firstDecimal);
-		lcdValue[6] = ' ';
-		lcdValue[7] = 'C';
+		lcdValue[0] = NEGATIVE_SIGN;
+		lcdValue[1] = (char)(ASCII_ZERO + hundreds);
+		lcdValue[2] = (char)(ASCII_ZERO + tens);
+		lcdValue[3] = (char)(ASCII_ZERO + units);
+		lcdValue[4] = DECIMAL_SEPARATOR;
+		lcdValue[5] = (char)(ASCII_ZERO + firstDecimal);
+		lcdValue[6] = SPACE_CHAR;
+		lcdValue[7] = CELSIUS_UNIT;
 		lcdValue[8] = '\0';
 	} else {
-		lcdValue[0] = (char)('0' + hundreds);
-		lcdValue[1] = (char)('0' + tens);
-		lcdValue[2] = (char)('0' + units);
-		lcdValue[3] = '.';
-		lcdValue[4] = (char)('0' + firstDecimal);
-		lcdValue[5] = ' ';
-		lcdValue[6] = 'C';
+		lcdValue[0] = (char)(ASCII_ZERO + hundreds);
+		lcdValue[1] = (char)(ASCII_ZERO + tens);
+		lcdValue[2] = (char)(ASCII_ZERO + units);
+		lcdValue[3] = DECIMAL_SEPARATOR;
+		lcdValue[4] = (char)(ASCII_ZERO + firstDecimal);
+		lcdValue[5] = SPACE_CHAR;
+		lcdValue[6] = CELSIUS_UNIT;
 		lcdValue[7] = '\0';
 	}
 
@@ -310,19 +324,19 @@ static void printVinMv(uint32_t Vin) {
 	uint8_t hundreds;
 	uint8_t tens;
 	uint8_t units;
-	char lcdValue[16];
+	char lcdValue[LCD_BUFFER_SIZE];
 
 	splitFourDigits(Vin, &thousands, &hundreds, &tens, &units);
 
 	printf("vin: %d%d%d%d mV\r\n", thousands, hundreds, tens, units);
 
-	lcdValue[0] = (char)('0' + thousands);
-	lcdValue[1] = (char)('0' + hundreds);
-	lcdValue[2] = (char)('0' + tens);
-	lcdValue[3] = (char)('0' + units);
-	lcdValue[4] = ' ';
-	lcdValue[5] = 'm';
-	lcdValue[6] = 'V';
+	lcdValue[0] = (char)(ASCII_ZERO + thousands);
+	lcdValue[1] = (char)(ASCII_ZERO + hundreds);
+	lcdValue[2] = (char)(ASCII_ZERO + tens);
+	lcdValue[3] = (char)(ASCII_ZERO + units);
+	lcdValue[4] = SPACE_CHAR;
+	lcdValue[5] = MILLI_UNIT;
+	lcdValue[6] = VOLT_UNIT;
 	lcdValue[7] = '\0';
 	API_LCD16x2_UpdateSecondRow(lcdValue, strlen(lcdValue));
 }
@@ -332,10 +346,10 @@ static void splitFourDigits(uint32_t value, uint8_t *thousands, uint8_t *hundred
 		return;
 	}
 
-	*thousands = (uint8_t)((value / 1000U) % 10U);
-	*hundreds = (uint8_t)((value / 100U) % 10U);
-	*tens = (uint8_t)((value / 10U) % 10U);
-	*units = (uint8_t)(value % 10U);
+	*thousands = (uint8_t)((value / (DECIMAL_BASE * DECIMAL_BASE * DECIMAL_BASE)) % DECIMAL_BASE);
+	*hundreds = (uint8_t)((value / (DECIMAL_BASE * DECIMAL_BASE)) % DECIMAL_BASE);
+	*tens = (uint8_t)((value / DECIMAL_BASE) % DECIMAL_BASE);
+	*units = (uint8_t)(value % DECIMAL_BASE);
 }
 
 static bool_t array2Num(uint8_t *ch, uint8_t size, uint32_t *value) {
@@ -347,12 +361,12 @@ static bool_t array2Num(uint8_t *ch, uint8_t size, uint32_t *value) {
     }
 
     for (i = 0; i < size; i++) {
-        if (ch[i] > 9U) {
+        if (ch[i] >= DECIMAL_BASE) {
             return false;
         }
-        convertedValue = (uint16_t)((convertedValue * 10U) + ch[i]);
+        convertedValue = (uint16_t)((convertedValue * DECIMAL_BASE) + ch[i]);
     }
 
     *value = convertedValue;
-    return (*value > 0U) && (*value < 200U);
+    return (*value > 0U) && (*value < MAX_VALID_FREQ_HZ);
 }
