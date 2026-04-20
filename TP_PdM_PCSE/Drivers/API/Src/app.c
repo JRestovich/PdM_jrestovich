@@ -42,7 +42,7 @@ static uint8_t newFreqIndex = 0;
 static void printTemperatureDigits(float temperatureC);
 static void printVinMv(uint32_t Vin);
 static void splitFourDigits(uint32_t value, uint8_t *thousands, uint8_t *hundreds, uint8_t *tens, uint8_t *units);
-static bool_t array2Num(uint8_t *ch, uint8_t size, uint16_t *value) ;
+static bool_t array2Num(uint8_t *ch, uint8_t size, uint32_t *value) ;
 
 bool_t APP_init() {
 	if (!API_MPR121_init()) {
@@ -76,7 +76,7 @@ bool_t APP_engine() {
 
     uint8_t key = 0U;
 
-    uint16_t freqValue;
+    uint32_t freqValue;
 
     if (touched) {
         printf("MPR121 value: %d \r\n", keysValue);
@@ -211,6 +211,7 @@ bool_t APP_engine() {
             }  else if (API_MPR121_getKey(key_3)) {
                 state = lightsBlinkSetFreq;
                 newFreqIndex = 0;
+                memset(newFreq, 0, sizeof(newFreq)); ///< clear array
                 API_LCD16x2_Clear();
                 API_LCD16x2_WriteStringAt(0, 0, blinkFreq, strlen(blinkFreq));
                 API_LCD16x2_SecondRow(0);
@@ -225,14 +226,18 @@ bool_t APP_engine() {
                 API_LCD16x2_Clear();
                 API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
             }  else if (API_MPR121_getKey(key_hashtag)) {
-                state = lightsBlink;
                 API_LCD16x2_Clear();
                 API_LCD16x2_WriteStringAt(0, 0, homeBlink, strlen(homeBlink));
 
-                if (array2Num(&newFreq[0], 3, &freqValue)) {
-                    printf("new freq: %hn \r\n", &freqValue);
+                if (array2Num(&newFreq[0], newFreqIndex, &freqValue)) {
+                    API_LED_SetBlinkFreq(&led, freqValue);
+                    printf("new freq: %lu \r\n", freqValue);
+                    state = lightsBlink;
                 } else {
-                    printf("freq not set: %hn \r\n", &freqValue);
+                    printf("freq not set: %lu \r\n", freqValue);
+                    state = error;
+                    API_LCD16x2_Clear();
+                    API_LCD16x2_WriteStringAt(0, 0, invalidFreq, strlen(invalidFreq));
                 }
             } else if (API_MPR121_getSingleKey(&key)) {
                 API_LCD16x2_sendSingleNumber(key);
@@ -343,13 +348,21 @@ static void splitFourDigits(uint32_t value, uint8_t *thousands, uint8_t *hundred
 	*units = (uint8_t)(value % 10U);
 }
 
-static bool_t array2Num(uint8_t *ch, uint8_t size, uint16_t *value) {
+static bool_t array2Num(uint8_t *ch, uint8_t size, uint32_t *value) {
     uint8_t i;
+    uint16_t convertedValue = 0U;
+
+    if ((ch == NULL) || (value == NULL) || (size == 0U)) {
+        return false;
+    }
+
     for (i = 0; i < size; i++) {
-        if (ch[i] < 0 || ch[i] > 9) {
+        if (ch[i] > 9U) {
             return false;
         }
-        *value += ch[i] * pow(10, (size - i));
+        convertedValue = (uint16_t)((convertedValue * 10U) + ch[i]);
     }
-    return *value > 1 && *value < 200;
+
+    *value = convertedValue;
+    return (*value > 0U) && (*value < 200U);
 }
