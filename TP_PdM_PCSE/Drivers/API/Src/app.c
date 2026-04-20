@@ -7,6 +7,9 @@
  * placa. La documentacion de la API publica se mantiene en `app.h`, mientras
  * que aqui se documentan unicamente los elementos privados del modulo.
  */
+
+/********************************************************/
+/* Includes */
 #include "app.h"
 #include <math.h>
 #include <stdlib.h>
@@ -18,6 +21,8 @@
 #include "API_delay.h"
 #include "API_led.h"
 
+/********************************************************/
+/* Defines */
 #define PORT_LED GPIOA                         ///< Puerto GPIO utilizado por el LED de usuario.
 #define PIN_LED GPIO_PIN_5                     ///< Pin GPIO asociado al LED de usuario.
 #define LCD_BUFFER_SIZE 16U                    ///< Longitud del buffer local usado para imprimir en el LCD.
@@ -35,6 +40,8 @@
 #define MILLI_UNIT 'm'                         ///< Prefijo de milivoltios mostrado en el LCD.
 #define VOLT_UNIT 'V'                          ///< Unidad de tension mostrada en el LCD.
 
+/********************************************************/
+/* Variables privadas */
 static const char welcomeMsg[]      = "Bienvenidos     "; ///< Texto mostrado durante la pantalla de bienvenida.
 static const char homeMsg[]         = "1Sensores-2Luces"; ///< Texto base del menu principal.
 static const char HomeSensors[]     = "1Temp-2Volt     "; ///< Texto del submenu de sensores analogicos.
@@ -57,6 +64,8 @@ static delay_t delay;                             ///< Temporizador reutilizable
 static uint8_t newFreq[FREQ_BUFFER_SIZE] = {0};   ///< Buffer temporal con los digitos de la nueva frecuencia.
 static uint8_t newFreqIndex = 0;                  ///< Cantidad de digitos cargados en `newFreq`.
 
+/********************************************************/
+/* Declaracion de funciones privadas */
 /**
  * @brief Convierte una temperatura en grados Celsius a una cadena para el LCD.
  *
@@ -104,6 +113,8 @@ static void splitFourDigits(uint32_t value, uint8_t *thousands, uint8_t *hundred
  */
 static bool_t array2Num(uint8_t *ch, uint8_t size, uint32_t *value);
 
+/********************************************************/
+/* Implementacion de funciones publicas */
 bool_t APP_init() {
 	if (!API_MPR121_init()) {
 		printf("Error al inicializar MPR121\r\n");
@@ -321,6 +332,8 @@ uint8_t APP_getError() {
     return errorFlag;
 }
 
+/********************************************************/
+/* Implementacion de funciones privadas */
 static void printTemperatureDigits(float temperatureC) {
 	int32_t temperatureTenths;
 	int32_t absTenths;

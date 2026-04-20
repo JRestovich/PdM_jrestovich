@@ -10,8 +10,12 @@
 #ifndef API_INC_APP_H_
 #define API_INC_APP_H_
 
+/********************************************************/
+/* Includes */
 #include "typedefs.h"
 
+/********************************************************/
+/* Declaracion de Tipos Publicos */
 /**
  * @brief Banderas de error reportadas durante la inicializacion de la
  *        aplicacion.
@@ -46,6 +50,8 @@ typedef enum {
     error
 } app_state_e;
 
+/********************************************************/
+/* Declaracion de Funciones Publicas */
 /**
  * @brief Inicializa los modulos requeridos por la aplicacion.
  *
