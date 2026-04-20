@@ -12,13 +12,10 @@
 
 /********************************************************/
 /* Includes */
-#include "stm32f4xx_hal.h"
-#include <stdbool.h>
+#include "typedefs.h"
 
 /********************************************************/
 /* Declaracion de Tipos Publicos */
-typedef bool bool_t;
-
 /**
  * @brief Descriptor de hardware asociado a un LED.
  *

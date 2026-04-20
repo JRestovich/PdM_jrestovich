@@ -13,17 +13,7 @@
 
 /********************************************************/
 /* Includes */
-#include <stdbool.h>
-
-/********************************************************/
-/* Declaracion de Tipos Publicos */
-/**
- * @brief Tipo booleano utilizado por la API del módulo.
- *
- * Provee una abstracción explícita para representar estados lógicos de éxito o
- * fallo en las funciones expuestas por la interfaz.
- */
-typedef bool bool_t;
+#include "typedefs.h"
 
 /********************************************************/
 /* Declaracion de Funciones Publicas */

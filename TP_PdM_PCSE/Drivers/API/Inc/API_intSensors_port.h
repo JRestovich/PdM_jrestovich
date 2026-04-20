@@ -13,20 +13,7 @@
 
 /********************************************************/
 /* Includes */
-#include "stm32f4xx_hal.h"
-
-#include <stdint.h>
-#include <stdbool.h>
-
-/********************************************************/
-/* Declaracion de Tipos Publicos */
-/**
- * @brief Tipo booleano utilizado por la interfaz de port del módulo.
- *
- * Se emplea para informar el resultado de las operaciones de inicialización,
- * adquisición y conversión realizadas por la capa dependiente del hardware.
- */
-typedef bool bool_t;
+#include "typedefs.h"
 
 /********************************************************/
 /* Declaracion de Funciones Publicas */
