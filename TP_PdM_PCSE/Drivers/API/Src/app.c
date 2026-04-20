@@ -1,8 +1,11 @@
-/*
- * app.c
+/**
+ * @file app.c
+ * @brief Implementacion de la maquina de estados principal de la aplicacion.
  *
- *  Created on: Apr 20, 2026
- *      Author: joaquin
+ * Este archivo integra la logica de navegacion entre pantallas, la lectura de
+ * sensores internos, la gestion del teclado tactil y el control del LED de la
+ * placa. La documentacion de la API publica se mantiene en `app.h`, mientras
+ * que aqui se documentan unicamente los elementos privados del modulo.
  */
 #include "app.h"
 #include <math.h>
@@ -15,49 +18,91 @@
 #include "API_delay.h"
 #include "API_led.h"
 
-#define PORT_LED GPIOA
-#define PIN_LED GPIO_PIN_5
-#define LCD_BUFFER_SIZE 16U
-#define WELCOME_DELAY_MS 5000U
-#define ONE_SECOND_MS 1000U
-#define FREQ_BUFFER_SIZE 3U
-#define DECIMAL_BASE 10U
-#define MAX_VALID_FREQ_HZ 200U
-#define TEMPERATURE_SCALE_FACTOR 10.0f
-#define ASCII_ZERO '0'
-#define NEGATIVE_SIGN '-'
-#define DECIMAL_SEPARATOR '.'
-#define SPACE_CHAR ' '
-#define CELSIUS_UNIT 'C'
-#define MILLI_UNIT 'm'
-#define VOLT_UNIT 'V'
-//                                  = "0123456789ABCDEF";
-static const char welcomeMsg[]      = "Bienvenidos     ";
-static const char homeMsg[]         = "1Sensores-2Luces";
-static const char HomeSensors[]     = "1Temp-2Volt     ";
-static const char temperature[]     = "Temperatura:    ";
-static const char voltInput[]       = "Alimentacion:   ";
-static const char homeLights[]      = "1Fix-2Blink ";
-static const char ledOn[]           = "Led encendido   ";
-static const char ledOff[]          = "Led apagado     ";
-static const char ledBlink[]        = "Led parpadeando ";
-static const char homeFix[]         = "1On-2off        ";
-static const char homeBlink[]       = "1On-2off-3Freq  ";
-static const char blinkFreq[]       = "Frecuencia:     ";
-static const char invalidFreq[]     = "Frec invalida   ";
+#define PORT_LED GPIOA                         ///< Puerto GPIO utilizado por el LED de usuario.
+#define PIN_LED GPIO_PIN_5                     ///< Pin GPIO asociado al LED de usuario.
+#define LCD_BUFFER_SIZE 16U                    ///< Longitud del buffer local usado para imprimir en el LCD.
+#define WELCOME_DELAY_MS 5000U                 ///< Tiempo de permanencia de la pantalla de bienvenida.
+#define ONE_SECOND_MS 1000U                    ///< Constante temporal de un segundo expresada en milisegundos.
+#define FREQ_BUFFER_SIZE 3U                    ///< Cantidad maxima de digitos aceptados para la frecuencia de parpadeo.
+#define DECIMAL_BASE 10U                       ///< Base decimal utilizada para conversiones numericas.
+#define MAX_VALID_FREQ_HZ 200U                 ///< Frecuencia maxima valida para el parpadeo del LED.
+#define TEMPERATURE_SCALE_FACTOR 10.0f         ///< Factor usado para obtener una cifra decimal de temperatura.
+#define ASCII_ZERO '0'                         ///< Codigo ASCII del caracter `'0'`.
+#define NEGATIVE_SIGN '-'                      ///< Signo utilizado para representar valores negativos.
+#define DECIMAL_SEPARATOR '.'                  ///< Separador decimal mostrado en pantalla.
+#define SPACE_CHAR ' '                         ///< Caracter espacio utilizado al formatear cadenas.
+#define CELSIUS_UNIT 'C'                       ///< Unidad de temperatura mostrada en el LCD.
+#define MILLI_UNIT 'm'                         ///< Prefijo de milivoltios mostrado en el LCD.
+#define VOLT_UNIT 'V'                          ///< Unidad de tension mostrada en el LCD.
 
-static app_state_e state = init;
-static uint8_t errorFlag = NO_ERROR;
-static led_t led;
-static delay_t delay;
+static const char welcomeMsg[]      = "Bienvenidos     "; ///< Texto mostrado durante la pantalla de bienvenida.
+static const char homeMsg[]         = "1Sensores-2Luces"; ///< Texto base del menu principal.
+static const char HomeSensors[]     = "1Temp-2Volt     "; ///< Texto del submenu de sensores analogicos.
+static const char temperature[]     = "Temperatura:    "; ///< Etiqueta de la pantalla de temperatura.
+static const char voltInput[]       = "Alimentacion:   "; ///< Etiqueta de la pantalla de tension de alimentacion.
+static const char homeLights[]      = "1Fix-2Blink ";     ///< Texto del submenu de control de luces.
+static const char ledOn[]           = "Led encendido   "; ///< Mensaje mostrado cuando el LED queda encendido fijo.
+static const char ledOff[]          = "Led apagado     "; ///< Mensaje mostrado cuando el LED queda apagado.
+static const char ledBlink[]        = "Led parpadeando "; ///< Mensaje mostrado cuando el LED entra en modo parpadeo.
+static const char homeFix[]         = "1On-2off        "; ///< Texto del submenu de LED fijo.
+static const char homeBlink[]       = "1On-2off-3Freq  "; ///< Texto del submenu de LED intermitente.
+static const char blinkFreq[]       = "Frecuencia:     "; ///< Etiqueta para el ingreso de frecuencia de parpadeo.
+static const char invalidFreq[]     = "Frec invalida   "; ///< Mensaje mostrado ante una frecuencia invalida.
 
-static uint8_t newFreq[FREQ_BUFFER_SIZE] = {0};
-static uint8_t newFreqIndex = 0;
+static app_state_e state = init;                  ///< Estado actual de la maquina principal de la aplicacion.
+static uint8_t errorFlag = NO_ERROR;              ///< Registro acumulado de errores de inicializacion.
+static led_t led;                                 ///< Instancia del controlador del LED de usuario.
+static delay_t delay;                             ///< Temporizador reutilizable para esperas no bloqueantes.
 
+static uint8_t newFreq[FREQ_BUFFER_SIZE] = {0};   ///< Buffer temporal con los digitos de la nueva frecuencia.
+static uint8_t newFreqIndex = 0;                  ///< Cantidad de digitos cargados en `newFreq`.
+
+/**
+ * @brief Convierte una temperatura en grados Celsius a una cadena para el LCD.
+ *
+ * Redondea el valor recibido a una cifra decimal, lo formatea en una cadena
+ * compatible con el display y actualiza la segunda fila con el resultado.
+ *
+ * @param temperatureC Temperatura a mostrar en grados Celsius.
+ */
 static void printTemperatureDigits(float temperatureC);
+
+/**
+ * @brief Convierte una tension en milivoltios a una cadena para el LCD.
+ *
+ * Descompone el valor recibido en digitos decimales, arma la cadena con la
+ * unidad correspondiente y actualiza la segunda fila del display.
+ *
+ * @param Vin Tension a mostrar en milivoltios.
+ */
 static void printVinMv(uint32_t Vin);
+
+/**
+ * @brief Descompone un numero decimal de hasta cuatro digitos.
+ *
+ * @param value Valor a separar en miles, centenas, decenas y unidades.
+ * @param thousands Puntero donde se almacena el digito de los miles.
+ * @param hundreds Puntero donde se almacena el digito de las centenas.
+ * @param tens Puntero donde se almacena el digito de las decenas.
+ * @param units Puntero donde se almacena el digito de las unidades.
+ */
 static void splitFourDigits(uint32_t value, uint8_t *thousands, uint8_t *hundreds, uint8_t *tens, uint8_t *units);
-static bool_t array2Num(uint8_t *ch, uint8_t size, uint32_t *value) ;
+
+/**
+ * @brief Convierte un arreglo de digitos decimales en un numero entero.
+ *
+ * Valida que cada posicion del arreglo contenga un digito decimal y construye
+ * el valor final aplicando la base diez. Solo acepta frecuencias dentro del
+ * rango valido definido por el modulo.
+ *
+ * @param ch Arreglo de digitos a convertir.
+ * @param size Cantidad de elementos validos en `ch`.
+ * @param value Puntero donde se almacena el numero convertido.
+ *
+ * @return `true` si la conversion fue valida y el numero quedo en rango,
+ *         `false` en caso contrario.
+ */
+static bool_t array2Num(uint8_t *ch, uint8_t size, uint32_t *value);
 
 bool_t APP_init() {
 	if (!API_MPR121_init()) {
