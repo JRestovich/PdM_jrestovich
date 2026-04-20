@@ -139,6 +139,28 @@ void API_LCD16x2_WriteCharAt(uint8_t row, uint8_t col, char data);
 void API_LCD16x2_WriteStringAt(uint8_t row, uint8_t col, const char *data, uint16_t size);
 
 /**
+ * @brief Actualiza el contenido completo de la primera fila del display.
+ *
+ * Limpia previamente la fila con espacios y luego escribe la cadena indicada
+ * desde la primera columna.
+ *
+ * @param data Puntero a la cadena a escribir en la primera fila.
+ * @param size Cantidad de caracteres de la cadena a transmitir.
+ */
+void API_LCD16x2_UpdateFirstRow(const char *data, uint16_t size);
+
+/**
+ * @brief Actualiza el contenido completo de la segunda fila del display.
+ *
+ * Limpia previamente la fila con espacios y luego escribe la cadena indicada
+ * desde la primera columna.
+ *
+ * @param data Puntero a la cadena a escribir en la segunda fila.
+ * @param size Cantidad de caracteres de la cadena a transmitir.
+ */
+void API_LCD16x2_UpdateSecondRow(const char *data, uint16_t size);
+
+/**
  * @brief Desplaza el cursor una posición hacia la izquierda o derecha.
  *
  * @param right `true` para desplazar hacia la derecha, `false` hacia la

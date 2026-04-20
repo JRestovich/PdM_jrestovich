@@ -203,6 +203,24 @@ void API_LCD16x2_WriteStringAt(uint8_t row, uint8_t col, const char *data, uint1
 	API_LCD16x2_SendString(data, size);
 }
 
+void API_LCD16x2_UpdateFirstRow(const char *data, uint16_t size) {
+	if (data == NULL) {
+		return;
+	}
+
+	API_LCD16x2_WriteStringAt(0, 0, blankDisplay, strlen(blankDisplay));
+	API_LCD16x2_WriteStringAt(0, 0, data, size);
+}
+
+void API_LCD16x2_UpdateSecondRow(const char *data, uint16_t size) {
+	if (data == NULL) {
+		return;
+	}
+
+	API_LCD16x2_WriteStringAt(1, 0, blankDisplay, strlen(blankDisplay));
+	API_LCD16x2_WriteStringAt(1, 0, data, size);
+}
+
 void API_LCD16x2_ShiftCursor(bool_t right) {
 	uint8_t shiftCmd = CURSOR_DISPLAY_SHIFT;
 
