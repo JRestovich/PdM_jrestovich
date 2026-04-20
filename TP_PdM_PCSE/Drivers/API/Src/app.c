@@ -6,6 +6,7 @@
  */
 #include "app.h"
 #include <string.h>
+#include <stdio.h>
 #include "API_MPR121.h"
 #include "API_LCD16x2.h"
 #include "API_intSensors.h"
@@ -31,11 +32,11 @@ bool_t APP_init() {
 		errorFlag |= ERROR_MPR121;
 	}
 	if (!API_LCD16x2_Init()) {
-		printf("Error al inicializar MPR121\r\n");
+		printf("Error al inicializar LCD\r\n");
 		errorFlag |= ERROR_LCD16x2;
 	}
 	if (!API_intSensors_init()) {
-        printf("Error al inicializar MPR121\r\n");
+        printf("Error al inicializar Sensores internos\r\n");
         errorFlag |= ERROR_INT_SENSORS;
     }
 	API_LED_Init(led, LD2_GPIO_Port, LD2_Pin);
@@ -51,6 +52,9 @@ bool_t APP_engine() {
     }
     uint16_t keysValue;
     bool_t touched = API_MPR121_readKeys(&keysValue);
+    if (touched) {
+        printf("MPR121 value: %d \r\n", keysValue);
+    }
 
     switch (state) {
         case init:
@@ -61,13 +65,14 @@ bool_t APP_engine() {
             break;
 
         case home:
-            if (touched) {
-                printf("MPR121 vlaue: %d", keysValue);
-               if (keysValue == key_1) {
-                   API_LCD16x2_WriteStringAt(0, 0, HomeSensors, strlen(HomeSensors));
-               } else if (keysValue == key_2) {
-                   API_LCD16x2_WriteStringAt(0, 0, homeLights, strlen(homeLights));
-               }
+            if (!touched) {
+                // Do nothing
+            } else if (API_MPR121_getKey(key_1)) {
+               API_LCD16x2_WriteStringAt(0, 0, HomeSensors, strlen(HomeSensors));
+               state = analogSensors;
+            } else if (API_MPR121_getKey(key_2)) {
+               API_LCD16x2_WriteStringAt(0, 0, homeLights, strlen(homeLights));
+               state = lights;
             }
 
             break;
