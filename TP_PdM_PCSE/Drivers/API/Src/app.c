@@ -217,9 +217,6 @@ bool_t APP_engine() {
                 API_LCD16x2_Clear();
                 API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
             }  else if (API_MPR121_getKey(key_hashtag)) {
-                API_LCD16x2_Clear();
-                API_LCD16x2_WriteStringAt(0, 0, homeBlink, strlen(homeBlink));
-
                 if (array2Num(&newFreq[0], newFreqIndex, &freqValue)) {
                     API_LED_SetBlinkFreq(&led, freqValue);
                     printf("new freq: %lu \r\n", freqValue);
@@ -227,6 +224,7 @@ bool_t APP_engine() {
                 } else {
                     printf("freq not set: %lu \r\n", freqValue);
                     state = error;
+                    delayInit(&delay, 1000);
                     API_LCD16x2_Clear();
                     API_LCD16x2_WriteStringAt(0, 0, invalidFreq, strlen(invalidFreq));
                 }
@@ -237,6 +235,7 @@ bool_t APP_engine() {
                     newFreqIndex++;
                 } else {
                     state = error;
+                    delayInit(&delay, 1000);
                     API_LCD16x2_Clear();
                     API_LCD16x2_WriteStringAt(0, 0, invalidFreq, strlen(invalidFreq));
                 }
