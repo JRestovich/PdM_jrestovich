@@ -149,10 +149,6 @@ bool_t APP_engine() {
 
     uint32_t freqValue;
 
-    if (touched) {
-        printf("MPR121 value: %d \r\n", keysValue);
-    }
-
     switch (state) {
 
         case init:
@@ -289,10 +285,8 @@ bool_t APP_engine() {
             }  else if (API_MPR121_getKey(key_hashtag)) {
                 if (array2Num(&newFreq[0], newFreqIndex, &freqValue)) {
                     API_LED_SetBlinkFreq(&led, freqValue);
-                    printf("new freq: %lu \r\n", freqValue);
                     state = lightsBlink;
                 } else {
-                    printf("freq not set: %lu \r\n", freqValue);
                     state = error;
                     delayInit(&delay, ONE_SECOND_MS);
                     API_LCD16x2_Clear();
@@ -345,13 +339,7 @@ static void printTemperatureDigits(float temperatureC) {
 
 	temperatureTenths = (int32_t)lroundf(temperatureC * TEMPERATURE_SCALE_FACTOR);
 	absTenths = abs(temperatureTenths);
-	splitFourDigits((uint32_t)absTenths, &hundreds, &tens, &units, &firstDecimal);
-
-	printf("temp: ");
-	if (temperatureTenths < 0) {
-		printf("%c", NEGATIVE_SIGN);
-	}
-	printf("%d%d%d.%d\r\n", hundreds, tens, units, firstDecimal);
+	splitFourDigits((uint32_t)absTenths, &hundreds, &tens, &units, &firstDecimal);	
 
 	if (temperatureTenths < 0) {
 		lcdValue[0] = NEGATIVE_SIGN;
@@ -385,8 +373,6 @@ static void printVinMv(uint32_t Vin) {
 	char lcdValue[LCD_BUFFER_SIZE];
 
 	splitFourDigits(Vin, &thousands, &hundreds, &tens, &units);
-
-	printf("vin: %d%d%d%d mV\r\n", thousands, hundreds, tens, units);
 
 	lcdValue[0] = (char)(ASCII_ZERO + thousands);
 	lcdValue[1] = (char)(ASCII_ZERO + hundreds);
