@@ -9,15 +9,11 @@
  */
 
 /********************************************************/
-/* Includes                                             */
-/********************************************************/
-
+/* Includes */
 #include "API_led_port.h"
 
 /********************************************************/
-/* Declaracion de Funciones Privadas                    */
-/********************************************************/
-
+/* Declaracion de funciones privadas */
 /**
  * @brief Habilita el clock del puerto GPIO utilizado por el LED.
  *
@@ -27,9 +23,7 @@
 static void _initPortClock(led_port_t* led);
 
 /********************************************************/
-/* Implementacion de Funciones Publicas                 */
-/********************************************************/
-
+/* Implementacion de funciones publicas */
 void API_LED_port_Init(led_port_t* led, GPIO_TypeDef *port, uint16_t pin) {
 	if (led == NULL) {
 		return;
@@ -82,9 +76,7 @@ bool_t API_LED_port_GetValue(led_port_t* led) {
 }
 
 /********************************************************/
-/* Implementacion de Funciones Privadas                 */
-/********************************************************/
-
+/* Implementacion de funciones privadas */
 static void _initPortClock(led_port_t* led) {
 	if (led == NULL || led->port == NULL) {
 		return;
