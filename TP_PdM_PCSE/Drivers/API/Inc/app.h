@@ -24,8 +24,7 @@ typedef enum {
     temperatureSensors,
     voltimeterSensor,
     lights,
-    lightsFixOn,
-    lightsFixOff,
+    lightsFix,
     lightsBlink,
     lightsBlinkSetFreq,
     error
