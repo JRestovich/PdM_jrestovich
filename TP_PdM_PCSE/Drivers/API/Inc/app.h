@@ -33,5 +33,6 @@ typedef enum {
 
 bool_t APP_init();
 bool_t APP_engine();
+uint8_t APP_getError();
 
 #endif /* API_INC_APP_H_ */
