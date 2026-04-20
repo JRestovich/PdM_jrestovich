@@ -32,6 +32,7 @@ static led_t* led;
 static delay_t delay;
 
 static void printTemperatureDigits(float temperatureC);
+static void printVinMv(uint32_t Vin);
 
 bool_t APP_init() {
 	if (!API_MPR121_init()) {
@@ -54,10 +55,11 @@ bool_t APP_init() {
 }
 
 bool_t APP_engine() {
-    if (errorFlag != NO_ERROR) {
-        return false;
-    }
-    float sensorRead;
+	    if (errorFlag != NO_ERROR) {
+	        return false;
+	    }
+	    float sensorRead;
+	    uint32_t vinMv;
 
     uint16_t keysValue;
     bool_t touched = API_MPR121_readKeys(&keysValue);
@@ -118,8 +120,16 @@ bool_t APP_engine() {
 	            }
 	            break;
 
-        case voltimeterSensor:
-            break;
+	        case voltimeterSensor:
+	            if (API_MPR121_getKey(key_asterisk)) {
+	                state = home;
+	                API_LCD16x2_Clear();
+	                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+	            } else if (delayRead(&delay)) {
+	                API_intSensors_readVoltMilliVolts(1000, &vinMv);
+	                printVinMv(vinMv);
+	            }
+	            break;
 
         case lights:
             break;
@@ -179,6 +189,25 @@ static void printTemperatureDigits(float temperatureC) {
 		snprintf(lcdValue, sizeof(lcdValue), "%d%d%d.%d C", hundreds, tens, units, firstDecimal);
 	}
 
+	API_LCD16x2_WriteStringAt(1, 0, whiteLine, strlen(whiteLine));
+	API_LCD16x2_WriteStringAt(1, 0, lcdValue, strlen(lcdValue));
+}
+
+static void printVinMv(uint32_t Vin) {
+	uint8_t thousands;
+	uint8_t hundreds;
+	uint8_t tens;
+	uint8_t units;
+	char lcdValue[16];
+
+	thousands = (uint8_t)((Vin / 1000U) % 10U);
+	hundreds = (uint8_t)((Vin / 100U) % 10U);
+	tens = (uint8_t)((Vin / 10U) % 10U);
+	units = (uint8_t)(Vin % 10U);
+
+	printf("vin: %d%d%d%d mV\r\n", thousands, hundreds, tens, units);
+
+	snprintf(lcdValue, sizeof(lcdValue), "%d%d%d%d mV", thousands, hundreds, tens, units);
 	API_LCD16x2_WriteStringAt(1, 0, whiteLine, strlen(whiteLine));
 	API_LCD16x2_WriteStringAt(1, 0, lcdValue, strlen(lcdValue));
 }
