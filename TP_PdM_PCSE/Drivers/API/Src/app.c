@@ -21,13 +21,15 @@
 static const char welcomeMsg[]      = "Bienvenidos";
 static const char homeMsg[]         = "1Sensores-2Luces";
 static const char HomeSensors[]     = "1Temp-2Volt";
-static const char homeLights[]      = "1On-2Off-3Blink";
 static const char temperature[]     = "Temperatura:";
 static const char voltInput[]       = "Alimentacion: ";
+static const char homeLights[]      = "1On-2Off-3Blink";
+static const char ledOn[]           = "Led encendido";
+static const char ledOff[]          = "Led apagado";
 
 static app_state_e state = init;
 static uint8_t errorFlag = NO_ERROR;
-static led_t* led;
+static led_t led;
 static delay_t delay;
 
 static void printTemperatureDigits(float temperatureC);
@@ -47,7 +49,7 @@ bool_t APP_init() {
         printf("Error al inicializar Sensores internos\r\n");
         errorFlag |= ERROR_INT_SENSORS;
     }
-	API_LED_Init(led, LD2_GPIO_Port, LD2_Pin);
+	API_LED_Init(&led, LD2_GPIO_Port, LD2_Pin);
 	delayInit(&delay, 5000);
 	API_LCD16x2_WriteStringAt(0, 0, welcomeMsg, strlen(welcomeMsg));
 
@@ -110,35 +112,70 @@ bool_t APP_engine() {
             }
             break;
 
-	    case temperatureSensors:
-            if (API_MPR121_getKey(key_asterisk)) {
-                state = home;
-                API_LCD16x2_Clear();
-                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
-            } else if (delayRead(&delay)) {
-                API_intSensors_readTempCelsius(1000, &sensorRead);
+		    case temperatureSensors:
+	            if (!touched) {
+	                // Do nothing
+	            } else if (API_MPR121_getKey(key_asterisk)) {
+	                state = home;
+	                API_LCD16x2_Clear();
+	                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+	            } else if (delayRead(&delay)) {
+	                API_intSensors_readTempCelsius(1000, &sensorRead);
                 printTemperatureDigits(sensorRead);
             }
             break;
 
-        case voltimeterSensor:
-            if (API_MPR121_getKey(key_asterisk)) {
-                state = home;
-                API_LCD16x2_Clear();
-                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
-            } else if (delayRead(&delay)) {
-                API_intSensors_readVoltMilliVolts(1000, &vinMv);
+	        case voltimeterSensor:
+	            if (!touched) {
+	                // Do nothing
+	            } else if (API_MPR121_getKey(key_asterisk)) {
+	                state = home;
+	                API_LCD16x2_Clear();
+	                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+	            } else if (delayRead(&delay)) {
+	                API_intSensors_readVoltMilliVolts(1000, &vinMv);
                 printVinMv(vinMv);
             }
             break;
 
-        case lights:
+	        case lights:
+	            if (!touched) {
+	                // Do nothing
+	            } else if (API_MPR121_getKey(key_asterisk)) {
+	                state = home;
+	                API_LCD16x2_Clear();
+	                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+	            } else if (API_MPR121_getKey(key_1)) {
+                state = lightsFixOn;
+                API_LCD16x2_Clear();
+                API_LCD16x2_WriteStringAt(0, 0, ledOn, strlen(ledOn));
+                API_LED_On(&led);
+            }  else if (API_MPR121_getKey(key_2)) {
+                state = lightsFixOff;
+                API_LCD16x2_Clear();
+                API_LCD16x2_WriteStringAt(0, 0, ledOff, strlen(ledOff));
+                API_LED_Off(&led);
+            }
             break;
 
-        case lightsFixOn:
-            break;
+	        case lightsFixOn:
+	            if (!touched) {
+	                // Do nothing
+	            } else if (API_MPR121_getKey(key_asterisk)) {
+	                state = home;
+	                API_LCD16x2_Clear();
+	                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+	            }
+	            break;
 
-        case lightsFixOff:
+	        case lightsFixOff:
+	            if (!touched) {
+	                // Do nothing
+	            } else if (API_MPR121_getKey(key_asterisk)) {
+	                state = home;
+	                API_LCD16x2_Clear();
+	                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+	            }
             break;
 
         case lightsBlink:
