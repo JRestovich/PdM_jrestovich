@@ -5,16 +5,25 @@
  * Created on: Apr 19, 2026
  * Author: joaquin
  */
+
+/********************************************************/
+/* Includes */
 #include "API_MPR121.h"
 #include "API_MPR121_port.h"
 #include <stdio.h>
 
+/********************************************************/
+/* Defines */
 #define RELEASED_VALUE 0U ///< Value used when no key is active.
 
+/********************************************************/
+/* Variables privadas */
 static keyboardState state = RELEASED; ///< Current keypad state.
 static uint16_t lastValue = 0; ///< Last raw keypad value read from the device.
 static uint16_t actualValue = 0; ///< Last confirmed keypad value reported to the user.
 
+/********************************************************/
+/* Declaracion de funciones privadas */
 /**
  * @brief Detects whether the keypad value changed since the last reading.
  *
@@ -55,6 +64,8 @@ static bool_t hasSingleBitSet(uint16_t value);
  */
 static bool_t getSingleBitValue(uint8_t *value);
 
+/********************************************************/
+/* Implementacion de funciones publicas */
 bool_t API_MPR121_init() {
 	lastValue = RELEASED_VALUE;
 	actualValue = RELEASED_VALUE;
@@ -105,7 +116,8 @@ bool_t API_MPR121_getSingleKey(uint8_t *key) {
 	return getSingleBitValue(key);
 }
 
-/***************************************************/
+/********************************************************/
+/* Implementacion de funciones privadas */
 static bool_t hasSingleBitSet(uint16_t value) {
 	return (value != RELEASED_VALUE) && ((value & (value - 1U)) == 0U);
 }

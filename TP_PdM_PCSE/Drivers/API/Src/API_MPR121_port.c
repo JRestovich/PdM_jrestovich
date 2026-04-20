@@ -6,9 +6,13 @@
  * Author: joaquin
  */
 
+/********************************************************/
+/* Includes */
 #include "API_MPR121_port.h"
 #include "API_I2C_DEVICE.h"
 
+/********************************************************/
+/* Defines */
 #define MPR121_ADDR 0x5A ///< I2C address of the MPR121 device.
 #define MPR121_REG_SOFTRESET 0x80 ///< Soft reset register address.
 #define MPR121_REG_ECR 0x5E ///< Electrode configuration register address.
@@ -30,10 +34,14 @@
 #define TWO_BYTES 2 ///< Length of two-byte transfers.
 #define KEYS_QTY 12 ///< Number of keypad electrodes used.
 
+/********************************************************/
+/* Variables privadas */
 //static I2C_HandleTypeDef hi2c;
 static bool_t initOk = false; ///< Indicates whether the port layer is initialized.
 static I2C_Device_t device = {0}; ///< I2C device descriptor used by the driver.
 
+/********************************************************/
+/* Declaracion de funciones privadas */
 /**
  * @brief Configures the MPR121 after the I2C interface is initialized.
  *
@@ -42,6 +50,8 @@ static I2C_Device_t device = {0}; ///< I2C device descriptor used by the driver.
  */
 static bool_t initModule();
 
+/********************************************************/
+/* Implementacion de funciones publicas */
 bool_t API_MPR121_port_init() {
 
 	if (!API_I2C_DEVICE_DefaultConfig(&device, I2C1)) {
@@ -83,7 +93,8 @@ bool_t API_MPR121_port_readKeys(uint16_t *keys) {
 	return true;
 }
 
-/*****************************************************/
+/********************************************************/
+/* Implementacion de funciones privadas */
 static bool_t initModule() {
 	uint8_t pData[BUFFER_SIZE];
 

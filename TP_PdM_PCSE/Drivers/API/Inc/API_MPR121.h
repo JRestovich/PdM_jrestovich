@@ -9,8 +9,12 @@
 #ifndef API_INC_API_MPR121_H_
 #define API_INC_API_MPR121_H_
 
+/********************************************************/
+/* Includes */
 #include "API_MPR121_port.h"
 
+/********************************************************/
+/* Declaracion de Tipos Publicos */
 /**
  * @brief Bit mask for the keypad keys reported by the MPR121.
  */
@@ -37,6 +41,8 @@ typedef enum {
 	PRESSED
 } keyboardState;
 
+/********************************************************/
+/* Declaracion de Funciones Publicas */
 /**
  * @brief Initializes the MPR121 driver.
  *
