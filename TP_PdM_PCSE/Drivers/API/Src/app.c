@@ -26,6 +26,7 @@ static const char voltInput[]       = "Alimentacion: ";
 static const char homeLights[]      = "1On-2Off-3Blink";
 static const char ledOn[]           = "Led encendido";
 static const char ledOff[]          = "Led apagado";
+static const char blinkFreq[]       = "Frecuencia:";
 
 static app_state_e state = init;
 static uint8_t errorFlag = NO_ERROR;
@@ -112,40 +113,40 @@ bool_t APP_engine() {
             }
             break;
 
-		    case temperatureSensors:
-	            if (!touched) {
-	                // Do nothing
-	            } else if (API_MPR121_getKey(key_asterisk)) {
-	                state = home;
-	                API_LCD16x2_Clear();
-	                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
-	            } else if (delayRead(&delay)) {
-	                API_intSensors_readTempCelsius(1000, &sensorRead);
-                printTemperatureDigits(sensorRead);
-            }
+        case temperatureSensors:
+            if (!touched) {
+                // Do nothing
+            } else if (API_MPR121_getKey(key_asterisk)) {
+                state = home;
+                API_LCD16x2_Clear();
+                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+            } else if (delayRead(&delay)) {
+                API_intSensors_readTempCelsius(1000, &sensorRead);
+            printTemperatureDigits(sensorRead);
+        }
             break;
 
-	        case voltimeterSensor:
-	            if (!touched) {
-	                // Do nothing
-	            } else if (API_MPR121_getKey(key_asterisk)) {
-	                state = home;
-	                API_LCD16x2_Clear();
-	                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
-	            } else if (delayRead(&delay)) {
-	                API_intSensors_readVoltMilliVolts(1000, &vinMv);
+        case voltimeterSensor:
+            if (!touched) {
+                // Do nothing
+            } else if (API_MPR121_getKey(key_asterisk)) {
+                state = home;
+                API_LCD16x2_Clear();
+                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+            } else if (delayRead(&delay)) {
+                API_intSensors_readVoltMilliVolts(1000, &vinMv);
                 printVinMv(vinMv);
             }
             break;
 
-	        case lights:
-	            if (!touched) {
-	                // Do nothing
-	            } else if (API_MPR121_getKey(key_asterisk)) {
-	                state = home;
-	                API_LCD16x2_Clear();
-	                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
-	            } else if (API_MPR121_getKey(key_1)) {
+        case lights:
+            if (!touched) {
+                // Do nothing
+            } else if (API_MPR121_getKey(key_asterisk)) {
+                state = home;
+                API_LCD16x2_Clear();
+                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+            } else if (API_MPR121_getKey(key_1)) {
                 state = lightsFixOn;
                 API_LCD16x2_Clear();
                 API_LCD16x2_WriteStringAt(0, 0, ledOn, strlen(ledOn));
@@ -155,30 +156,42 @@ bool_t APP_engine() {
                 API_LCD16x2_Clear();
                 API_LCD16x2_WriteStringAt(0, 0, ledOff, strlen(ledOff));
                 API_LED_Off(&led);
+            }  else if (API_MPR121_getKey(key_3)) {
+                state = lightsFixOff;
+                API_LCD16x2_Clear();
+                API_LCD16x2_WriteStringAt(0, 0, blinkFreq, strlen(blinkFreq));
+                API_LED_Off(&led);
             }
             break;
 
-	        case lightsFixOn:
-	            if (!touched) {
-	                // Do nothing
-	            } else if (API_MPR121_getKey(key_asterisk)) {
-	                state = home;
-	                API_LCD16x2_Clear();
-	                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
-	            }
-	            break;
+        case lightsFixOn:
+            if (!touched) {
+                // Do nothing
+            } else if (API_MPR121_getKey(key_asterisk)) {
+                state = home;
+                API_LCD16x2_Clear();
+                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+            }
+            break;
 
-	        case lightsFixOff:
-	            if (!touched) {
-	                // Do nothing
-	            } else if (API_MPR121_getKey(key_asterisk)) {
-	                state = home;
-	                API_LCD16x2_Clear();
-	                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
-	            }
+        case lightsFixOff:
+            if (!touched) {
+                // Do nothing
+            } else if (API_MPR121_getKey(key_asterisk)) {
+                state = home;
+                API_LCD16x2_Clear();
+                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+            }
             break;
 
         case lightsBlink:
+            if (!touched) {
+                // Do nothing
+            } else if (API_MPR121_getKey(key_asterisk)) {
+                state = home;
+                API_LCD16x2_Clear();
+                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+            }
             break;
 
         case lightsBlinkSetFreq:
