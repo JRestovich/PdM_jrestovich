@@ -11,8 +11,12 @@
 #ifndef API_INC_API_INTSENSORS_H_
 #define API_INC_API_INTSENSORS_H_
 
+/********************************************************/
+/* Includes */
 #include <stdbool.h>
 
+/********************************************************/
+/* Declaracion de Tipos Publicos */
 /**
  * @brief Tipo booleano utilizado por la API del módulo.
  *
@@ -21,6 +25,8 @@
  */
 typedef bool bool_t;
 
+/********************************************************/
+/* Declaracion de Funciones Publicas */
 /**
  * @brief Inicializa el módulo de sensores internos.
  *

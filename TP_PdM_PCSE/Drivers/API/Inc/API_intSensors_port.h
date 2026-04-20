@@ -11,11 +11,15 @@
 #ifndef API_INTSENSORS_PORT_H_
 #define API_INTSENSORS_PORT_H_
 
+/********************************************************/
+/* Includes */
 #include "stm32f4xx_hal.h"
 
 #include <stdint.h>
 #include <stdbool.h>
 
+/********************************************************/
+/* Declaracion de Tipos Publicos */
 /**
  * @brief Tipo booleano utilizado por la interfaz de port del módulo.
  *
@@ -24,6 +28,8 @@
  */
 typedef bool bool_t;
 
+/********************************************************/
+/* Declaracion de Funciones Publicas */
 /**
  * @brief Inicializa el periférico ADC y la secuencia de canales internos.
  *
