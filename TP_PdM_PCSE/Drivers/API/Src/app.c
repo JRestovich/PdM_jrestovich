@@ -68,6 +68,7 @@ bool_t APP_engine() {
     }
 
     switch (state) {
+
         case init:
             if (delayRead(&delay)) {
                 state = home;
@@ -109,27 +110,27 @@ bool_t APP_engine() {
             }
             break;
 
-	        case temperatureSensors:
-	            if (API_MPR121_getKey(key_asterisk)) {
-	                state = home;
-	                API_LCD16x2_Clear();
-	                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
-	            } else if (delayRead(&delay)) {
-	                API_intSensors_readTempCelsius(1000, &sensorRead);
-	                printTemperatureDigits(sensorRead);
-	            }
-	            break;
+	    case temperatureSensors:
+            if (API_MPR121_getKey(key_asterisk)) {
+                state = home;
+                API_LCD16x2_Clear();
+                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+            } else if (delayRead(&delay)) {
+                API_intSensors_readTempCelsius(1000, &sensorRead);
+                printTemperatureDigits(sensorRead);
+            }
+            break;
 
-	        case voltimeterSensor:
-	            if (API_MPR121_getKey(key_asterisk)) {
-	                state = home;
-	                API_LCD16x2_Clear();
-	                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
-	            } else if (delayRead(&delay)) {
-	                API_intSensors_readVoltMilliVolts(1000, &vinMv);
-	                printVinMv(vinMv);
-	            }
-	            break;
+        case voltimeterSensor:
+            if (API_MPR121_getKey(key_asterisk)) {
+                state = home;
+                API_LCD16x2_Clear();
+                API_LCD16x2_WriteStringAt(0, 0, homeMsg, strlen(homeMsg));
+            } else if (delayRead(&delay)) {
+                API_intSensors_readVoltMilliVolts(1000, &vinMv);
+                printVinMv(vinMv);
+            }
+            break;
 
         case lights:
             break;
