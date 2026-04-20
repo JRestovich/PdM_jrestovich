@@ -63,4 +63,18 @@ bool_t API_MPR121_getKey(MPR121_keyValue key);
  */
 bool_t API_MPR121_readKeys (uint16_t *newValue);
 
+/**
+ * @brief Returns the numeric value of the last confirmed key if it is unique.
+ *
+ * Evaluates the last valid key captured by the driver and converts it to a
+ * decimal digit from 0 to 9. The function only succeeds when exactly one key
+ * is active and that key corresponds to a numeric keypad key.
+ *
+ * @param key Pointer to the variable where the detected digit is stored.
+ * @return true A single numeric key was detected and converted successfully.
+ * @return false No key is available, multiple keys are active, or the key does
+ * not map to a numeric digit.
+ */
+bool_t API_MPR121_getSingleKey(uint8_t *key);
+
 #endif /* API_INC_API_MPR121_H_ */
