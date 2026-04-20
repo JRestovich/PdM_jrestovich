@@ -43,6 +43,16 @@ bool_t updateValue(bool_t update, uint16_t *newValue);
  */
 static bool_t hasSingleBitSet(uint16_t value);
 
+/**
+ * @brief Converts the last confirmed keypad value to its numeric digit.
+ *
+ * Maps the internally stored keypad state to a decimal digit only for keys
+ * `0` to `9`. Non-numeric keys such as `*` and `#` are rejected.
+ *
+ * @param value Pointer to the variable where the detected digit is stored.
+ * @return true The stored value maps to a single numeric digit.
+ * @return false The stored value does not correspond to a numeric digit.
+ */
 static bool_t getSingleBitValue(uint8_t *value);
 
 bool_t API_MPR121_init() {
