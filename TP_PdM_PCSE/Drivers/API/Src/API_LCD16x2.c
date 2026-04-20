@@ -271,6 +271,10 @@ void API_LCD16x2_LoadTextFromRight(const char *data, uint16_t size) {
 	API_LCD16x2_SendString(buffer, strlen(buffer));
 }
 
+void API_LCD16x2_sendSingleNumber(uint8_t number) {
+    API_LCD16x2_SendByte('0' + number);
+}
+
 static void controlLcd(uint8_t valor) {
 	send8bit(valor, CONTROL);
 }

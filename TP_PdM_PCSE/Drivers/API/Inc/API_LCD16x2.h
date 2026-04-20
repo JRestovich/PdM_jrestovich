@@ -202,4 +202,14 @@ void API_LCD16x2_Backlight(bool_t on);
  */
 void API_LCD16x2_LoadTextFromRight(const char *data, uint16_t size);
 
+/**
+ * @brief Envía al LCD un único dígito decimal en la posición actual del cursor.
+ *
+ * Convierte el valor numérico recibido a su carácter ASCII equivalente y lo
+ * transmite al display. Esta función está pensada para dígitos individuales.
+ *
+ * @param number Dígito decimal a mostrar. Debe estar en el rango `0` a `9`.
+ */
+void API_LCD16x2_sendSingleNumber(uint8_t number);
+
 #endif /* API_INC_API_LCD16X2_H_ */
