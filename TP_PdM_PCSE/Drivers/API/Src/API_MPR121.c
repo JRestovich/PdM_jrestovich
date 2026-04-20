@@ -7,6 +7,7 @@
  */
 #include "API_MPR121.h"
 #include "API_MPR121_port.h"
+#include <stdio.h>
 
 #define RELEASED_VALUE 0U ///< Value used when no key is active.
 
@@ -86,6 +87,8 @@ bool_t valueChange(uint16_t *newValue) {
 bool_t updateValue(bool_t update, uint16_t *newValue) {
 	if (!update) {
 		*newValue = RELEASED_VALUE;
+	} else {
+	    *newValue = actualValue;
 	}
 
 	return update;
