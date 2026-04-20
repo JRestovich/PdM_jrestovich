@@ -18,7 +18,6 @@
 #define LD2_GPIO_Port GPIOA
 #define LD2_Pin GPIO_PIN_5
 //                                  = "0123456789ABCDEF";
-static const char whiteLine[]       = "                ";
 static const char welcomeMsg[]      = "Bienvenidos";
 static const char homeMsg[]         = "1Sensores-2Luces";
 static const char HomeSensors[]     = "1Temp-2Volt";
@@ -33,6 +32,7 @@ static delay_t delay;
 
 static void printTemperatureDigits(float temperatureC);
 static void printVinMv(uint32_t Vin);
+static void splitFourDigits(uint32_t value, uint8_t *thousands, uint8_t *hundreds, uint8_t *tens, uint8_t *units);
 
 bool_t APP_init() {
 	if (!API_MPR121_init()) {
@@ -171,11 +171,7 @@ static void printTemperatureDigits(float temperatureC) {
 
 	temperatureTenths = (int32_t)lroundf(temperatureC * 10.0f);
 	absTenths = abs(temperatureTenths);
-
-	hundreds = (uint8_t)((absTenths / 1000U) % 10U);
-	tens = (uint8_t)((absTenths / 100U) % 10U);
-	units = (uint8_t)((absTenths / 10U) % 10U);
-	firstDecimal = (uint8_t)(absTenths % 10U);
+	splitFourDigits((uint32_t)absTenths, &hundreds, &tens, &units, &firstDecimal);
 
 	printf("temp: ");
 	if (temperatureTenths < 0) {
@@ -184,13 +180,27 @@ static void printTemperatureDigits(float temperatureC) {
 	printf("%d%d%d.%d\r\n", hundreds, tens, units, firstDecimal);
 
 	if (temperatureTenths < 0) {
-		snprintf(lcdValue, sizeof(lcdValue), "-%d%d%d.%d C", hundreds, tens, units, firstDecimal);
+		lcdValue[0] = '-';
+		lcdValue[1] = (char)('0' + hundreds);
+		lcdValue[2] = (char)('0' + tens);
+		lcdValue[3] = (char)('0' + units);
+		lcdValue[4] = '.';
+		lcdValue[5] = (char)('0' + firstDecimal);
+		lcdValue[6] = ' ';
+		lcdValue[7] = 'C';
+		lcdValue[8] = '\0';
 	} else {
-		snprintf(lcdValue, sizeof(lcdValue), "%d%d%d.%d C", hundreds, tens, units, firstDecimal);
+		lcdValue[0] = (char)('0' + hundreds);
+		lcdValue[1] = (char)('0' + tens);
+		lcdValue[2] = (char)('0' + units);
+		lcdValue[3] = '.';
+		lcdValue[4] = (char)('0' + firstDecimal);
+		lcdValue[5] = ' ';
+		lcdValue[6] = 'C';
+		lcdValue[7] = '\0';
 	}
 
-	API_LCD16x2_WriteStringAt(1, 0, whiteLine, strlen(whiteLine));
-	API_LCD16x2_WriteStringAt(1, 0, lcdValue, strlen(lcdValue));
+	API_LCD16x2_UpdateSecondRow(lcdValue, strlen(lcdValue));
 }
 
 static void printVinMv(uint32_t Vin) {
@@ -200,14 +210,28 @@ static void printVinMv(uint32_t Vin) {
 	uint8_t units;
 	char lcdValue[16];
 
-	thousands = (uint8_t)((Vin / 1000U) % 10U);
-	hundreds = (uint8_t)((Vin / 100U) % 10U);
-	tens = (uint8_t)((Vin / 10U) % 10U);
-	units = (uint8_t)(Vin % 10U);
+	splitFourDigits(Vin, &thousands, &hundreds, &tens, &units);
 
 	printf("vin: %d%d%d%d mV\r\n", thousands, hundreds, tens, units);
 
-	snprintf(lcdValue, sizeof(lcdValue), "%d%d%d%d mV", thousands, hundreds, tens, units);
-	API_LCD16x2_WriteStringAt(1, 0, whiteLine, strlen(whiteLine));
-	API_LCD16x2_WriteStringAt(1, 0, lcdValue, strlen(lcdValue));
+	lcdValue[0] = (char)('0' + thousands);
+	lcdValue[1] = (char)('0' + hundreds);
+	lcdValue[2] = (char)('0' + tens);
+	lcdValue[3] = (char)('0' + units);
+	lcdValue[4] = ' ';
+	lcdValue[5] = 'm';
+	lcdValue[6] = 'V';
+	lcdValue[7] = '\0';
+	API_LCD16x2_UpdateSecondRow(lcdValue, strlen(lcdValue));
+}
+
+static void splitFourDigits(uint32_t value, uint8_t *thousands, uint8_t *hundreds, uint8_t *tens, uint8_t *units) {
+	if (thousands == NULL || hundreds == NULL || tens == NULL || units == NULL) {
+		return;
+	}
+
+	*thousands = (uint8_t)((value / 1000U) % 10U);
+	*hundreds = (uint8_t)((value / 100U) % 10U);
+	*tens = (uint8_t)((value / 10U) % 10U);
+	*units = (uint8_t)(value % 10U);
 }
