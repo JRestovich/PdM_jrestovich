@@ -9,8 +9,6 @@
 /********************************************************/
 /* Includes */
 #include "API_MPR121.h"
-#include "API_MPR121_port.h"
-#include <stdio.h>
 
 /********************************************************/
 /* Defines */
@@ -31,7 +29,7 @@ static uint16_t actualValue = 0; ///< Last confirmed keypad value reported to th
  * @return true The keypad value changed.
  * @return false The keypad value did not change or the read failed.
  */
-bool_t valueChange(uint16_t *newValue);
+static bool_t valueChange(uint16_t *newValue);
 
 /**
  * @brief Updates the output value according to the current event state.
@@ -41,7 +39,7 @@ bool_t valueChange(uint16_t *newValue);
  * @return true A new value is available.
  * @return false No new value is available.
  */
-bool_t updateValue(bool_t update, uint16_t *newValue);
+static bool_t updateValue(bool_t update, uint16_t *newValue);
 
 /**
  * @brief Checks whether a value has exactly one bit set.
@@ -172,14 +170,14 @@ static bool_t getSingleBitValue(uint8_t *value) {
     return ret;
 }
 
-bool_t valueChange(uint16_t *newValue) {
+static bool_t valueChange(uint16_t *newValue) {
 	if (!API_MPR121_port_readKeys(newValue)) {
 		return false;
 	}
 	return lastValue != *newValue;
 }
 
-bool_t updateValue(bool_t update, uint16_t *newValue) {
+static bool_t updateValue(bool_t update, uint16_t *newValue) {
 	if (!update) {
 		*newValue = RELEASED_VALUE;
 	} else {

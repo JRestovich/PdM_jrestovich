@@ -18,12 +18,10 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "app.h"
-#include "API_delay.h"
 
 /* Private define ------------------------------------------------------------*/
 
@@ -139,7 +137,6 @@ bool_t uartInit()
 		        huart2.Init.StopBits,
 		        huart2.Init.Parity);
 
-//		uartSendStringSize((uint8_t*)buffer, strlen(buffer));
 		HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
 	    return true;
 	}

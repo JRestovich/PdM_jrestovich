@@ -11,8 +11,6 @@
 /********************************************************/
 /* Includes */
 #include "API_LCD16x2.h"
-#include "API_LCD16x2_port.h"
-#include "API_delay.h"
 #include <stdio.h>
 #include <string.h>
 
