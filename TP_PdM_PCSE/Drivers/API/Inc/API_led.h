@@ -96,6 +96,18 @@ void API_LED_Toggle(led_t* led);
 void API_LED_Engine(led_t* led);
 
 /**
+ * @brief Pausa o reanuda el parpadeo de un LED en modo intermitente.
+ *
+ * Permite detener temporalmente la conmutacion del LED sin abandonar el modo
+ * `BLINK`. Al pausar, la implementacion apaga fisicamente el LED; al reanudar,
+ * `API_LED_Engine` vuelve a atender el temporizado configurado.
+ *
+ * @param led Puntero a la estructura del LED a pausar o reanudar.
+ * @param pause `true` para pausar el parpadeo, `false` para reanudarlo.
+ */
+void API_LED_Pause(led_t* led, bool_t pause);
+
+/**
  * @brief Configura el modo de funcionamiento del LED.
  *
  * Actualiza el modo logico de operacion del LED entre comportamiento fijo o
