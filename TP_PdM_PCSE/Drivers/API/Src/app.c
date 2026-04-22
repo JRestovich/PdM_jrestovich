@@ -286,6 +286,8 @@ bool_t APP_engine() {
                 if (array2Num(&newFreq[0], newFreqIndex, &freqValue)) {
                     API_LED_SetBlinkFreq(&led, freqValue);
                     state = lightsBlink;
+                    API_LCD16x2_Clear();
+                    API_LCD16x2_UpdateFirstRow(homeBlink, strlen(homeBlink));
                 } else {
                     state = error;
                     delayInit(&delay, ONE_SECOND_MS);
