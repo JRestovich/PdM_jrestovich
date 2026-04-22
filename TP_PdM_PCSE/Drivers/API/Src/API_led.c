@@ -82,9 +82,6 @@ void API_LED_SetMode(led_t* led, led_mode_e mode) {
 	if (led == NULL) {
 		return;
 	}
-	if (led->mode == mode) {
-		return;
-	}
 	if (mode == BLINK) {
 		paused = false;
 	}
