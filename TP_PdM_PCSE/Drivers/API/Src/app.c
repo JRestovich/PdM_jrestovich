@@ -51,10 +51,12 @@ static const char homeLights[]      = "1Fix-2Blink ";     ///< Texto del submenu
 static const char ledOn[]           = "Led encendido   "; ///< Mensaje mostrado cuando el LED queda encendido fijo.
 static const char ledOff[]          = "Led apagado     "; ///< Mensaje mostrado cuando el LED queda apagado.
 static const char ledBlink[]        = "Led parpadeando "; ///< Mensaje mostrado cuando el LED entra en modo parpadeo.
+static const char ledPaused[]       = "Led pausado     "; ///< Mensaje mostrado cuando el LED pausa su parpadeo.
 static const char homeFix[]         = "1On-2off        "; ///< Texto del submenu de LED fijo.
-static const char homeBlink[]       = "1On-2off-3Freq  "; ///< Texto del submenu de LED intermitente.
+static const char homeBlink[]       = "1On-2Pause-3Freq"; ///< Texto del submenu de LED intermitente.
 static const char blinkFreq[]       = "Frecuencia:     "; ///< Etiqueta para el ingreso de frecuencia de parpadeo.
 static const char invalidFreq[]     = "Frec invalida   "; ///< Mensaje mostrado ante una frecuencia invalida.
+static const char invalidCmd[]      = "Comando invalido"; ///< Mensaje mostrado ante un comando invalido.
 
 static app_state_e state = init;                  ///< Estado actual de la maquina principal de la aplicacion.
 static uint8_t errorFlag = NO_ERROR;              ///< Registro acumulado de errores de inicializacion.
@@ -265,8 +267,12 @@ bool_t APP_engine() {
                 API_LCD16x2_UpdateSecondRow(ledBlink, strlen(ledBlink));
                 API_LED_SetMode(&led, BLINK);
             }  else if (API_MPR121_getKey(key_2)) {
-                API_LCD16x2_UpdateSecondRow(ledOff, strlen(ledOff));
-                API_LED_SetMode(&led, FIX);
+                if (API_LED_GetMode(&led) != BLINK) {
+                    API_LCD16x2_UpdateSecondRow(invalidCmd, strlen(invalidCmd));
+                } else {
+                    API_LCD16x2_UpdateSecondRow(ledPaused, strlen(ledPaused));
+                    API_LED_Pause(&led, true);
+                }            
             }  else if (API_MPR121_getKey(key_3)) {
                 state = lightsBlinkSetFreq;
                 newFreqIndex = 0;
