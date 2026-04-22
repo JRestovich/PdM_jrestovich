@@ -245,9 +245,11 @@ bool_t APP_engine() {
                 API_LCD16x2_UpdateFirstRow(homeMsg, strlen(homeMsg));
             }  else if (API_MPR121_getKey(key_1)) {
                 API_LCD16x2_UpdateSecondRow(ledOn, strlen(ledOn));
+                API_LED_SetMode(&led, FIX);
                 API_LED_On(&led);
             } else if (API_MPR121_getKey(key_2)) {
                 API_LCD16x2_UpdateSecondRow(ledOff, strlen(ledOff));
+                API_LED_SetMode(&led, FIX);
                 API_LED_Off(&led);
             }
             break;
